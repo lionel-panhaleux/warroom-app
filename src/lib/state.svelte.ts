@@ -23,12 +23,18 @@ function defaultTerritoryStates(): Record<string, TerritoryState> {
 function defaultGameState(): GameState {
   const nations = {} as Record<NationId, NationState>
   for (const id of NATION_IDS) nations[id] = defaultNationState()
-  return { round: 0, roundPhase: 'income' as const, nations, territories: defaultTerritoryStates() }
+  return {
+    round: 0, roundPhase: 'income' as const, nations, territories: defaultTerritoryStates(),
+    neutralInvasionHistory: {}, neutralInvasionsThisRound: {}, pactBroken: false,
+  }
 }
 
 function migrateState(game: GameState): GameState {
   if (!game.territories) game.territories = defaultTerritoryStates()
   if (!game.roundPhase) (game as any).roundPhase = 'income'
+  if (!game.neutralInvasionHistory) game.neutralInvasionHistory = {}
+  if (!game.neutralInvasionsThisRound) game.neutralInvasionsThisRound = {}
+  if (game.pactBroken === undefined) game.pactBroken = false
   return game
 }
 

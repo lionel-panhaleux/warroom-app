@@ -72,6 +72,9 @@ export interface GameState {
   roundPhase: RoundPhase
   nations: Record<NationId, NationState>
   territories: Record<string, TerritoryState>
+  neutralInvasionHistory: Partial<Record<NationId, string[]>> // permanent: territory codes invaded per nation
+  neutralInvasionsThisRound: Partial<Record<NationId, number>> // count per nation, reset each round
+  pactBroken: boolean // Soviet-Japanese Non-Aggression Pact (one-time, permanent)
 }
 
 export interface AppState {

@@ -1,4 +1,4 @@
-import type { NationId, TerritoryState } from './types'
+import type { NationId, TerritoryState, GameState } from './types'
 import { UNITS, CAPITALS } from './data'
 import { TERRITORY_MAP } from './territories'
 
@@ -21,10 +21,17 @@ export function medalCount(territoryCode: string): number {
   return 1
 }
 
-/** Check if territory is neutral and currently unowned (first-time invasion = +1 stress) */
-export function isNeutralInvasion(code: string, territories: Record<string, TerritoryState>): boolean {
+/** Check if territory is a neutral first-time invasion for this nation (uses history to prevent double-counting) */
+export function isNeutralInvasion(code: string, nationId: NationId, history: Partial<Record<NationId, string[]>>): boolean {
   const def = TERRITORY_MAP[code]
   if (!def || !def.isNeutral) return false
-  const state = territories[code]
-  return !state || state.owner === null
+  const invaded = history[nationId] ?? []
+  return !invaded.includes(code)
+}
+
+/** Record a neutral invasion into game state (mutates game) */
+export function recordNeutralInvasion(game: GameState, nationId: NationId, code: string) {
+  if (!game.neutralInvasionHistory[nationId]) game.neutralInvasionHistory[nationId] = []
+  game.neutralInvasionHistory[nationId]!.push(code)
+  game.neutralInvasionsThisRound[nationId] = (game.neutralInvasionsThisRound[nationId] ?? 0) + 1
 }

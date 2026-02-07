@@ -2,7 +2,7 @@
   import { appState, setState } from '../../lib/state.svelte'
   import { NATION_IDS, NATIONS, UNITS } from '../../lib/data'
   import { TERRITORIES, TERRITORY_MAP } from '../../lib/territories'
-  import { computeCasualtyPoints, medalCount, isNeutralInvasion } from '../../lib/battle'
+  import { computeCasualtyPoints, medalCount, isNeutralInvasion, recordNeutralInvasion } from '../../lib/battle'
   import { icon } from '../../lib/icons'
   import type { NationId, TerritoryDef } from '../../lib/types'
   import NationSelector from '../economy/NationSelector.svelte'
@@ -55,8 +55,8 @@
   let medalsAwarded = $derived(location && location !== 'sea' && outcome === 'changes-hands' ? medalCount(location) : 0)
   let svStress = $derived(locationDef?.sv ?? 0)
   let neutralInvasion = $derived(
-    location !== null && location !== 'sea' && outcome === 'changes-hands'
-      ? isNeutralInvasion(location, appState.game.territories)
+    location !== null && location !== 'sea' && outcome === 'changes-hands' && newOwner
+      ? isNeutralInvasion(location, newOwner, appState.game.neutralInvasionHistory)
       : false
   )
 
@@ -114,9 +114,9 @@
         game.nations[prevOwner].stress += svStress
       }
 
-      // Neutral invasion stress to attacker
+      // Record neutral invasion (stress applied in morale phase)
       if (neutralInvasion) {
-        game.nations[newOwner].stress += 1
+        recordNeutralInvasion(game, newOwner, location)
       }
     } else if (!isSeaBattle && outcome === 'embattled' && location) {
       game.territories[location].embattled = true

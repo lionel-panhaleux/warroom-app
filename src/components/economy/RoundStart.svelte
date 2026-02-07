@@ -30,6 +30,7 @@
       game.nations[id].iron += inc.iron
       game.nations[id].osr += inc.osr
     }
+    game.neutralInvasionsThisRound = {}
     game.round += 1
     game.roundPhase = 'bidding'
     setState(game)

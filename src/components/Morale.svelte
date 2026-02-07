@@ -2,7 +2,7 @@
   import type { NationId } from '../lib/types'
   import { NATION_IDS } from '../lib/data'
   import { appState, setState } from '../lib/state.svelte'
-  import { initAllDecisions, computeMoralePreview, applyMoralePhase } from '../lib/morale'
+  import { initAllDecisions, computeMoralePreview, applyMoralePhase, isPactBrokenInDecisions } from '../lib/morale'
   import type { NationMoraleDecisions } from '../lib/morale'
   import NationSelector from './economy/NationSelector.svelte'
   import StressOverview from './morale/StressOverview.svelte'
@@ -11,7 +11,15 @@
   import ZonePenalties from './morale/ZonePenalties.svelte'
 
   let selectedNation: NationId = $state('CHN')
-  let allDecisions: Record<NationId, NationMoraleDecisions> = $state(initAllDecisions())
+  let allDecisions: Record<NationId, NationMoraleDecisions> = $state(initAllDecisionsFromGame())
+
+  function initAllDecisionsFromGame() {
+    const d = initAllDecisions()
+    for (const id of NATION_IDS) {
+      d[id].neutralInvasionCount = appState.game.neutralInvasionsThisRound[id] ?? 0
+    }
+    return d
+  }
 
   const ns = $derived(appState.game.nations[selectedNation])
   const decisions = $derived(allDecisions[selectedNation])
@@ -24,7 +32,7 @@
       const n = appState.game.nations[id]
       const d = allDecisions[id]
       const unrest = d.unrestPay.oil + d.unrestPay.iron + d.unrestPay.osr
-      out[id] = n.casualtyPoints > 0 || n.stress > 0 || d.medalsToSpend > 0 || d.cgToSpend > 0 || d.reliefMedals > 0 || d.reliefCG > 0 || unrest > 0
+      out[id] = n.casualtyPoints > 0 || n.stress > 0 || d.medalsToSpend > 0 || d.cgToSpend > 0 || d.reliefMedals > 0 || d.reliefCG > 0 || unrest > 0 || d.neutralInvasionCount > 0 || d.breakPact
     }
     return out
   })
@@ -55,8 +63,9 @@
   function handleApply() {
     if (validationError) return
     const newNations = applyMoralePhase(appState.game.nations, allDecisions)
-    setState({ ...appState.game, nations: newNations, roundPhase: 'production' as const })
-    allDecisions = initAllDecisions()
+    const pactBroken = appState.game.pactBroken || isPactBrokenInDecisions(allDecisions)
+    setState({ ...appState.game, nations: newNations, roundPhase: 'production' as const, pactBroken })
+    allDecisions = initAllDecisionsFromGame()
   }
 </script>
 
@@ -67,7 +76,7 @@
   <NationSelector bind:selected={selectedNation} {indicators} />
 
   <div class="space-y-5 bg-bg-surface rounded-xl p-4">
-    <StressOverview {ns} nationId={selectedNation} bind:decisions={allDecisions[selectedNation]} />
+    <StressOverview {ns} nationId={selectedNation} bind:decisions={allDecisions[selectedNation]} pactBroken={appState.game.pactBroken} />
 
     <hr class="border-bg-surface-alt" />
 

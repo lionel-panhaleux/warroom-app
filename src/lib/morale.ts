@@ -7,10 +7,14 @@ export interface NationMoraleDecisions {
   reliefMedals: number
   reliefCG: number
   unrestPay: { oil: number; iron: number; osr: number }
+  neutralInvasionCount: number
+  breakPact: boolean
 }
 
 export interface MoralePreview {
   casualtyStress: number
+  neutralStress: number
+  pactStress: number
   totalStress: number
   stressAfterCancel: number
   zoneBeforeRelief: HomelandZone
@@ -25,7 +29,7 @@ export interface MoralePreview {
 }
 
 export function emptyMoraleDecisions(): NationMoraleDecisions {
-  return { medalsToSpend: 0, cgToSpend: 0, reliefMedals: 0, reliefCG: 0, unrestPay: { oil: 0, iron: 0, osr: 0 } }
+  return { medalsToSpend: 0, cgToSpend: 0, reliefMedals: 0, reliefCG: 0, unrestPay: { oil: 0, iron: 0, osr: 0 }, neutralInvasionCount: 0, breakPact: false }
 }
 
 export function initAllDecisions(): Record<NationId, NationMoraleDecisions> {
@@ -63,7 +67,9 @@ function evaluateZone(stress: number, zone: HomelandZone, threshold: number): { 
 export function computeMoralePreview(ns: NationState, nationId: NationId, d: NationMoraleDecisions): MoralePreview {
   const threshold = NATIONS[nationId].stressThreshold
   const casualtyStress = casualtyToStress(ns.casualtyPoints)
-  const totalStress = ns.stress + casualtyStress
+  const neutralStress = d.neutralInvasionCount
+  const pactStress = d.breakPact ? 6 : 0
+  const totalStress = ns.stress + casualtyStress + neutralStress + pactStress
   const cancelledStress = d.medalsToSpend + d.cgToSpend
   const stressAfterCancel = Math.max(0, totalStress - cancelledStress)
 
@@ -84,11 +90,17 @@ export function computeMoralePreview(ns: NationState, nationId: NationId, d: Nat
   const finalCG = ns.civilianGoods - d.cgToSpend - d.reliefCG
 
   return {
-    casualtyStress, totalStress, stressAfterCancel,
+    casualtyStress, neutralStress, pactStress,
+    totalStress, stressAfterCancel,
     zoneBeforeRelief, advances, remainingStress,
     reliefEligible, reliefCost, finalZone, finalStress,
     finalMedals, finalCG,
   }
+}
+
+/** Check if any nation is breaking the pact */
+export function isPactBrokenInDecisions(decisions: Record<NationId, NationMoraleDecisions>): boolean {
+  return decisions.USSR.breakPact || decisions.JAP.breakPact
 }
 
 /** Apply morale phase to all nations. Returns new nations record. */
