@@ -6,18 +6,19 @@
 
 - **Stack**: Svelte 5 + Vite + TypeScript + Tailwind CSS v4 + vite-plugin-pwa
 - **Storage**: localStorage + undo stack (current state only)
-- **Navigation**: Bottom tab bar (4 tabs)
+- **Navigation**: Bottom tab bar (5 tabs, phase-gated)
 - **UI**: Dark theme, mobile-first, touch-friendly, nation/resource/zone color tokens
 - **Scope**: Single active game, Global War scenario (7 nations)
 
 ### Tabs
 
-| Tab | Purpose | Game Phases |
-|-----|---------|-------------|
-| **Dashboard** | Round overview, per-nation status (resources, medals, civilian goods, zone) | — |
-| **Economy** | Resource income, oil bidding, unit production, trade | Phase 1 & 7 |
-| **Battle** | Unit losses, repairs, territory exchanges, raids | Phase 4 |
-| **Morale** | Stress track, zone management, medals | Phase 6 |
+| Tab | Purpose | Game Phases | Gating |
+|-----|---------|-------------|--------|
+| **Dashboard** | Round overview, per-nation status, territories | — | Always |
+| **Economy** | Income collection, oil bidding | Phase 1 | Always |
+| **Battle** | Unit losses, repairs, territory exchanges, raids | Phase 4 | Always |
+| **Morale** | Stress track, zone management, medals | Phase 6 | Locked until morale/production phase |
+| **Production** | Unit orders, trade, civilian goods, bomb repair | Phase 7 | Locked until production phase |
 
 ### File Structure
 
@@ -30,15 +31,18 @@ src/
   lib/territories.ts         131 territory definitions
   lib/economy.ts             Income, trade, production helpers
   lib/battle.ts              Battle CP calculation, medal count, neutral invasion
+  lib/morale.ts              Morale phase: stress, zone evaluation, relief, penalties
   lib/state.svelte.ts        Reactive state ($state), localStorage, undo
   lib/icons.ts               SVG icon strings + icon() helper
-  components/TabBar.svelte   Fixed bottom nav
-  components/Dashboard.svelte
-  components/Economy.svelte
-  components/Battle.svelte
-  components/Morale.svelte
-  components/economy/        RoundStart, Production, Territories, etc.
+  components/TabBar.svelte   Fixed bottom nav (5 tabs, phase-gated)
+  components/Dashboard.svelte  Nation overview + expandable territories
+  components/Economy.svelte    Income + oil bidding (RoundStart)
+  components/Battle.svelte     Battle + raids
+  components/Morale.svelte     Stress/zone phase
+  components/Production.svelte Unit orders, trade, civ goods, bomb repair
+  components/economy/        RoundStart, Territories, NationSelector, etc.
   components/battle/         BattleNav, BattleMain, Raids
+  components/morale/         StressOverview, ZoneEvaluation, ZoneRelief, ZonePenalties
   components/shared/         Counter
   styles/app.css             Tailwind v4 + @theme tokens + icon sizing
 assets/icons/                Nation flags, unit silhouettes, resource/marker/UI SVGs
@@ -67,39 +71,14 @@ Battle tab with 2 sub-tabs: Battle (territory-centric combat recording with 5-st
 
 ---
 
-## Phase 4: Morale Tab
+## Phase 4: Morale Tab + Navigation Restructure ✅
 
-Stress and homeland zone management for Phase 6.
+Morale tab with full stress/zone lifecycle. Navigation restructured from 4 tabs to 5 phase-gated tabs.
 
-### Stress Sources (all feed into the stress track)
-- **Casualties**: pull casualty points from battle tab → convert via chart (max 6/round)
-- **Territory loss**: SV of lost territories (from battle tab)
-- **Soviet-Japanese Pact breaking**: 6 stress for the breaker + no medals from opponent's territories that round
-- **Neutral invasion**: 1 stress per neutral territory (first time only)
-
-### Step 1: Sum Stress
-- Auto-sum all stress sources for the round
-- Add to existing stress on track
-
-### Step 2: Cancel Stress
-- Spend medals (1:1 stress reduction)
-- Spend civilian goods (1:1 stress reduction)
-
-### Step 3: Zone Evaluation
-- Compare stress vs nation threshold
-- Auto-advance zones when stress ≥ threshold
-- Reduce stress by threshold on each advance
-- Repeat if still over threshold
-
-### Step 4: Zone Relief
-- Spend medals/civilian goods = threshold to slide back 1 zone
-- Max 1 zone relief per round, can't go past White
-
-### Step 5: Zone Penalties
-- Display active penalties (cumulative) per nation
-- Enforce: Blue (pay 3), Yellow (no rails/ports/sea trade), Orange (−3 orders), Red (no income), Gray (desertion)
-
-**Deliverable**: Full morale lifecycle — stress accumulation, cancellation, zone changes, penalties.
+- **Morale phase**: StressOverview (casualty→stress conversion, medal/CG cancel), ZoneEvaluation (auto-advance when stress ≥ threshold), ZoneRelief (spend medals/CG to slide back 1 zone), ZonePenalties (Blue unrest payment, zone effect display)
+- **Phase gating**: income → bidding → morale → production → income. Morale and Production tabs locked until their phase. Battle always accessible.
+- **Navigation restructure**: Economy simplified to income+bidding only. Production promoted to top-level tab. Territories moved to expandable Dashboard section. EconomyNav sub-tabs removed.
+- **Unrest moved**: Blue zone unrest payment moved from Production to Morale (ZonePenalties).
 
 ---
 
@@ -189,7 +168,7 @@ Visual refinement pass.
 |-------|--------|-------|
 | 1. Foundation | ✅ Done | commit f3e7e32 |
 | 2. Economy Tab | ✅ Done | commit de62861 |
-| 3. Battle Tab | ✅ Done | |
-| 4. Morale Tab | Not started | |
-| 5. Dashboard Tab | Ongoing | Enhanced alongside other phases |
+| 3. Battle Tab | ✅ Done | commit ce6dd01 |
+| 4. Morale + Nav Restructure | ✅ Done | commit f8b6567 |
+| 5. Dashboard Tab | ✅ Done | Enhanced alongside other phases |
 | 6. Polish & Theming | Ongoing | Dark theme, icons, PWA done |

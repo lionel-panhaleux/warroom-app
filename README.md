@@ -6,52 +6,35 @@ Designed for a single shared mobile device during a game session.
 
 ## Features
 
-- **Resource Tracking** — Oil, Iron, OSR per nation with income tallying
-- **Morale Management** — Casualty conversion, stress tracking, homeland status zones, medals
-- **Phase Guidance** — Step-by-step assistance for National Economy, Morale, and Production phases
-- **Battle Loss Recording** — Track eliminated units for morale calculations
+- **Resource Tracking** — Oil, Iron, OSR per nation with territory-based income
+- **Economy Phase** — Income collection, oil bidding, turn order
+- **Battle Recording** — Unit losses, casualty points, territory captures, medals, raids
+- **Morale Management** — Casualty→stress conversion, zone evaluation, relief, penalties
+- **Production** — Unit orders, trade, civilian goods, bomb repair
+- **Phase Gating** — Guided round flow: income → bidding → morale → production
+- **131 Territories** — Searchable/filterable, owner changes, embattled tracking
+- **Offline PWA** — Works fully offline once installed
+
+## Tech Stack
+
+Svelte 5 + Vite + TypeScript + Tailwind CSS v4 + vite-plugin-pwa
 
 ## Running Locally
 
-Serve the directory with any static file server:
-
 ```sh
-# Python
-python3 -m http.server 8000
-
-# Node
-npx serve .
+npm install
+npm run dev
 ```
-
-Open `http://localhost:8000` on your phone (same network) or desktop browser.
 
 ## Installing as PWA
 
 On mobile, use "Add to Home Screen" from the browser menu. The app works fully offline once installed.
-
-## Architecture
-
-Single-page vanilla JS app. No build step, no dependencies.
-
-```
-index.html          App shell
-manifest.json       PWA manifest
-sw.js               Service worker (offline caching)
-css/style.css       Styles (mobile-first)
-js/app.js           App init and tab routing
-js/state.js         Game state (localStorage + undo)
-js/data.js          Static game data
-js/ui.js            Shared UI helpers
-js/phases/          Tab modules (dashboard, economy, battle, morale)
-```
 
 ## Game Reference
 
 - `references/game-overview.md` — Condensed mechanics relevant to the app
 - `references/game-data.md` — Nations, unit costs, zones, thresholds
 - `references/complete_rules.md` — Full rules (parsed from PDF)
-- `references/WR_RULES_2ND_EDITION_V27u-compressed.pdf` — Official rulebook
-- `references/War_Room_FAQ_v2_2023.pdf` — Official FAQ & errata
 
 ## Development
 
