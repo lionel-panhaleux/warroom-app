@@ -9,11 +9,11 @@
   } = $props()
 
   const tabs: { id: Tab; label: string; svg: string }[] = [
-    { id: 'dashboard',  label: 'Dashboard',  svg: navIcons.dashboard },
-    { id: 'economy',    label: 'Economy',     svg: navIcons.economy },
-    { id: 'battle',     label: 'Battle',      svg: navIcons.battle },
-    { id: 'morale',     label: 'Morale',      svg: navIcons.morale },
-    { id: 'production', label: 'Produce',     svg: navIcons.production },
+    { id: 'dashboard',  label: 'Home',     svg: navIcons.dashboard },
+    { id: 'economy',    label: 'Econ',     svg: navIcons.economy },
+    { id: 'battle',     label: 'Battle',   svg: navIcons.battle },
+    { id: 'morale',     label: 'Morale',   svg: navIcons.morale },
+    { id: 'production', label: 'Build',    svg: navIcons.production },
   ]
 </script>
 
@@ -31,7 +31,7 @@
       onclick={() => activeTab = tab.id}
     >
       <span class="mb-0.5 [&>svg]:w-5 [&>svg]:h-5">{@html tab.svg}</span>
-      {tab.label}
+      <span class="hidden min-[360px]:inline">{tab.label}</span>
     </button>
   {/each}
   </div>

@@ -25,7 +25,7 @@ function defaultGameState(): GameState {
   for (const id of NATION_IDS) nations[id] = defaultNationState()
   return {
     round: 0, roundPhase: 'income' as const, nations, territories: defaultTerritoryStates(),
-    neutralInvasionHistory: {}, neutralInvasionsThisRound: {}, pactBroken: false,
+    neutralInvasionHistory: {}, neutralInvasionsThisRound: {}, pactBroken: false, turnOrder: null,
   }
 }
 
@@ -35,6 +35,7 @@ function migrateState(game: GameState): GameState {
   if (!game.neutralInvasionHistory) game.neutralInvasionHistory = {}
   if (!game.neutralInvasionsThisRound) game.neutralInvasionsThisRound = {}
   if (game.pactBroken === undefined) game.pactBroken = false
+  if (game.turnOrder === undefined) game.turnOrder = null
   return game
 }
 
@@ -83,4 +84,18 @@ export function resetGame() {
 /** Save without undo (for auto-persist from $effect) */
 export function persist() {
   saveState(appState)
+}
+
+/** B1: Detect storage changes from other tabs */
+export const STORAGE_KEY_EXPORT = STORAGE_KEY
+export function reloadFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (raw) {
+      const state: AppState = JSON.parse(raw)
+      state.game = migrateState(state.game)
+      appState.game = state.game
+      appState.undoStack = state.undoStack
+    }
+  } catch { /* ignore */ }
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { HomelandZone } from '../../lib/types'
-  import { HOMELAND_ZONES, NATIONS } from '../../lib/data'
+  import { HOMELAND_ZONES, NATIONS, ZONE_INFO } from '../../lib/data'
   import { zoneIndex } from '../../lib/morale'
   import type { NationId } from '../../lib/types'
 
@@ -11,6 +11,13 @@
     nationId: NationId
   } = $props()
 
+  const ZONE_LABELS: Record<HomelandZone, string> = {
+    White: 'A', Blue: 'U', Yellow: 'Dy', Orange: 'Di', Red: 'C', Gray: 'De',
+  }
+  const ZONE_COLORS: Record<HomelandZone, string> = {
+    White: '#ffffff', Blue: '#3498db', Yellow: '#f1c40f',
+    Orange: '#e67e22', Red: '#e74c3c', Gray: '#7f8c8d',
+  }
   const threshold = $derived(NATIONS[nationId].stressThreshold)
   const curIdx = $derived(zoneIndex(currentZone))
   const projIdx = $derived(zoneIndex(projectedZone))
@@ -30,10 +37,11 @@
           class="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold
                  {isCurrent && !isProjected ? 'ring-2 ring-white' : ''}
                  {isProjected && !isCurrent ? 'ring-2 ring-accent' : ''}
-                 {isCurrent && isProjected ? 'ring-2 ring-white' : ''}"
-          style="background:var(--color-zone-{z}); color:{z === 'White' || z === 'Yellow' ? '#111' : '#fff'}"
+                 {isCurrent && isProjected ? 'ring-2 ring-white' : ''}
+                 {!isCurrent && !isProjected ? 'ring-1 ring-white/20' : ''}"
+          style="background:{ZONE_COLORS[z]}; color:{z === 'White' || z === 'Yellow' ? '#111' : '#fff'}"
         >
-          {z[0]}
+          {ZONE_LABELS[z]}
         </div>
         {#if isCurrent && !isProjected}
           <span class="text-[9px] text-text-muted">now</span>

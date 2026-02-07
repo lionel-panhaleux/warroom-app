@@ -8,6 +8,26 @@
   import NationSelector from '../economy/NationSelector.svelte'
   import Counter from '../shared/Counter.svelte'
 
+  // --- U5: Battle history log ---
+  interface BattleLogEntry {
+    location: string
+    nationsInvolved: NationId[]
+    totalCP: number
+    outcome: string
+    newOwner: NationId | null
+  }
+  let battleLog: BattleLogEntry[] = $state([])
+  let showLog = $state(false)
+  let currentRound = $state(appState.game.round)
+
+  // Clear log on round change
+  $effect(() => {
+    if (appState.game.round !== currentRound) {
+      battleLog = []
+      currentRound = appState.game.round
+    }
+  })
+
   // --- Step 1: Location ---
   let locationSearch = $state('')
   let location: string | null = $state(null) // territory code or 'sea'
@@ -61,9 +81,17 @@
   )
 
   // --- Step 4: Repairs ---
-  let repairNation: NationId = $state('GER')
+  // U12: Default to first nation with losses, fallback to first allied
+  let repairNation: NationId = $state('CHN')
   let repairNationState = $derived(appState.game.nations[repairNation])
   let repairs: Record<NationId, { oil: number; iron: number; osr: number }> = $state(initRepairs())
+
+  // U12: Auto-select repair nation when losses change
+  $effect(() => {
+    if (nationsWithLosses.length > 0 && !nationsWithLosses.includes(repairNation)) {
+      repairNation = nationsWithLosses[0]
+    }
+  })
 
   function initRepairs() {
     const out = {} as Record<NationId, { oil: number; iron: number; osr: number }>
@@ -133,6 +161,18 @@
     }
 
     setState(game)
+
+    // U5: Log entry
+    const locName = isSeaBattle ? 'Sea Battle' : (locationDef?.name ?? location ?? '?')
+    const outcomeLabel = isSeaBattle ? 'Sea' : outcome === 'changes-hands' ? `→ ${newOwner}` : outcome === 'embattled' ? 'Embattled' : 'No Change'
+    battleLog = [...battleLog, {
+      location: locName,
+      nationsInvolved: nationsWithLosses,
+      totalCP,
+      outcome: outcomeLabel,
+      newOwner: outcome === 'changes-hands' ? newOwner : null,
+    }]
+
     resetAll()
   }
 
@@ -145,7 +185,7 @@
     newOwner = null
     medalRecipient = null
     repairs = initRepairs()
-    repairNation = 'GER'
+    repairNation = 'CHN'
   }
 
   function selectLocation(code: string) {
@@ -155,6 +195,35 @@
 </script>
 
 <div class="space-y-4">
+  <!-- U5: Battle log -->
+  {#if battleLog.length > 0}
+    <section class="bg-bg-surface rounded-lg p-3">
+      <button class="w-full flex items-center justify-between text-xs font-semibold text-accent uppercase tracking-wide" onclick={() => showLog = !showLog}>
+        Battles this round ({battleLog.length})
+        <span>{showLog ? '\u25B2' : '\u25BC'}</span>
+      </button>
+      {#if showLog}
+        <div class="mt-2 space-y-1">
+          {#each battleLog as entry, i}
+            <div class="flex items-center justify-between text-xs border-b border-bg-surface-alt/50 py-1 last:border-0">
+              <div class="flex items-center gap-1.5">
+                <span class="text-text-muted">{i + 1}.</span>
+                <span class="font-medium">{entry.location}</span>
+                <span class="text-text-muted">({entry.totalCP} CP)</span>
+              </div>
+              <div class="flex items-center gap-1">
+                {#each entry.nationsInvolved as nid}
+                  {@html icon('nations', nid, 'icon-xs')}
+                {/each}
+                <span class="text-text-muted ml-1">{entry.outcome}</span>
+              </div>
+            </div>
+          {/each}
+        </div>
+      {/if}
+    </section>
+  {/if}
+
   <!-- Step 1: Location -->
   <section class="bg-bg-surface rounded-lg p-3 space-y-2">
     <h2 class="text-sm font-semibold text-text-muted uppercase tracking-wide">1. Location</h2>
@@ -170,11 +239,17 @@
       {#if searchResults.length > 0}
         <div class="space-y-1 max-h-48 overflow-y-auto">
           {#each searchResults as t}
+            {@const ts = appState.game.territories[t.code]}
             <button
               class="w-full text-left px-3 py-2 rounded-md text-xs bg-bg-surface-alt/50 hover:bg-accent/10 active:bg-accent/20 flex justify-between items-center"
               onclick={() => selectLocation(t.code)}
             >
-              <span><span class="font-mono text-text-muted mr-1">{t.code}</span> {t.name}</span>
+              <span>
+                <span class="font-mono text-text-muted mr-1">{t.code}</span> {t.name}
+                <!-- U10: Show owner and embattled in search results -->
+                <span class="text-text-muted ml-1">({ts?.owner ?? 'Neutral'})</span>
+                {#if ts?.embattled}<span class="text-danger ml-0.5">!</span>{/if}
+              </span>
               <span class="text-text-muted">SV {t.sv}</span>
             </button>
           {/each}

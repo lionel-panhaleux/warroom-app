@@ -10,7 +10,7 @@
   } = $props()
 </script>
 
-<div class="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
+<div class="flex gap-1.5 overflow-x-auto py-1 -mx-1 px-1">
   {#each NATION_IDS as id}
     {@const ns = appState.game.nations[id]}
     {@const hasOrder = indicators?.[id]}

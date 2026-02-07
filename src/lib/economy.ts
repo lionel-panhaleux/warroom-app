@@ -1,4 +1,4 @@
-import type { NationId, ResourceType, GameState, TerritoryState, NationState, NationProductionOrders } from './types'
+import type { NationId, ResourceType, GameState, TerritoryState, NationState, NationProductionOrders, TurnOrderEntry } from './types'
 import { TERRITORY_MAP } from './territories'
 import { UNITS, RESOURCES, NATION_IDS } from './data'
 
@@ -38,8 +38,7 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 /** Compute turn order from bids: descending by amount, ties shuffled randomly */
-export function computeTurnOrder(bids: OilBid[]): { nationId: NationId; amount: number; tied: boolean }[] {
-  // Group by amount, shuffle within groups, then flatten
+export function computeTurnOrder(bids: OilBid[]): TurnOrderEntry[] {
   const groups = new Map<number, OilBid[]>()
   for (const b of bids) {
     const g = groups.get(b.amount) ?? []
@@ -47,7 +46,7 @@ export function computeTurnOrder(bids: OilBid[]): { nationId: NationId; amount: 
     groups.set(b.amount, g)
   }
   const amounts = [...groups.keys()].sort((a, b) => b - a)
-  const result: { nationId: NationId; amount: number; tied: boolean }[] = []
+  const result: TurnOrderEntry[] = []
   for (const amt of amounts) {
     const g = groups.get(amt)!
     const isTied = g.length > 1

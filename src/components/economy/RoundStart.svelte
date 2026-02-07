@@ -6,6 +6,8 @@
   import type { NationId } from '../../lib/types'
   import Counter from '../shared/Counter.svelte'
 
+  let { showToast }: { showToast: (msg: string) => void } = $props()
+
   let phase = $derived(appState.game.roundPhase)
 
   let incomes = $derived(
@@ -17,7 +19,9 @@
     Object.fromEntries(NATION_IDS.map(id => [id, 0])) as Record<NationId, number>
   )
   let bidError: string | null = $state(null)
-  let turnOrder: ReturnType<typeof computeTurnOrder> | null = $state(null)
+
+  // U8: Round label
+  let roundLabel = $derived(appState.game.round === 0 ? 'Setup' : `Round ${appState.game.round}`)
 
   function collectIncome() {
     const game = structuredClone($state.snapshot(appState.game))
@@ -31,9 +35,11 @@
       game.nations[id].osr += inc.osr
     }
     game.neutralInvasionsThisRound = {}
+    game.turnOrder = null
     game.round += 1
     game.roundPhase = 'bidding'
     setState(game)
+    showToast('Income collected — proceed to Oil Bidding')
   }
 
   function confirmBids() {
@@ -46,10 +52,11 @@
     for (const b of bidList) {
       game.nations[b.nationId].oil -= b.amount
     }
+    game.turnOrder = computeTurnOrder(bidList)
     game.roundPhase = 'morale'
     setState(game)
-    turnOrder = computeTurnOrder(bidList)
     bids = Object.fromEntries(NATION_IDS.map(id => [id, 0])) as Record<NationId, number>
+    showToast('Bids confirmed — check choice order below')
   }
 
 </script>
@@ -58,7 +65,7 @@
   <!-- Income Preview -->
   <section>
     <h2 class="text-sm font-semibold text-text-muted uppercase tracking-wide mb-2">
-      Income Preview — Round {appState.game.round}
+      Income Preview — {roundLabel}
     </h2>
     <div class="bg-bg-surface rounded-lg overflow-hidden">
       <table class="w-full text-xs">
@@ -93,13 +100,17 @@
              {phase !== 'income' ? 'bg-bg-surface-alt text-text-muted' : 'bg-accent text-bg-primary active:bg-accent-dim'}"
       disabled={phase !== 'income'}
       onclick={collectIncome}
-    >{phase === 'income' ? 'Collect Income' : 'Income Collected ✓'}</button>
+    >{phase === 'income' ? 'Collect Income' : 'Income Collected \u2713'}</button>
   </section>
 
   <!-- Oil Bidding -->
   <section>
     <h2 class="text-sm font-semibold text-text-muted uppercase tracking-wide mb-2">Oil Bidding</h2>
-    <div class="space-y-2 {phase !== 'bidding' ? 'opacity-50 pointer-events-none' : ''}">
+    <!-- U4: Clearer disabled state with label -->
+    {#if phase !== 'bidding' && phase !== 'income'}
+      <div class="text-center py-3 text-sm text-accent/70 font-medium">Bids Confirmed \u2713</div>
+    {/if}
+    <div class="space-y-2 {phase !== 'bidding' ? 'opacity-30 pointer-events-none' : ''}">
       {#each NATION_IDS as id}
         {@const ns = appState.game.nations[id]}
         <div class="flex items-center justify-between bg-bg-surface rounded-lg px-3 py-2">
@@ -121,11 +132,11 @@
       <p class="text-danger text-xs mt-2">{bidError}</p>
     {/if}
 
-    {#if (phase === 'morale' || phase === 'production') && turnOrder}
+    {#if (phase === 'morale' || phase === 'production') && appState.game.turnOrder}
       <div class="mt-3 bg-bg-surface rounded-lg p-3">
-        <h3 class="text-xs font-semibold text-accent mb-1.5">Turn Order</h3>
+        <h3 class="text-xs font-semibold text-accent mb-1.5">Choice Order</h3>
         <ol class="space-y-1">
-          {#each turnOrder as entry, i}
+          {#each appState.game.turnOrder as entry, i}
             <li class="flex items-center gap-2 text-xs">
               <span class="text-text-muted w-4">{i + 1}.</span>
               {@html icon('nations', entry.nationId, 'icon-xs')}

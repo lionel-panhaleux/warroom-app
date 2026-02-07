@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { appState, setState, resetGame } from '../lib/state.svelte'
+  import { appState, setState, resetGame, undo } from '../lib/state.svelte'
   import { NATIONS, ALLIED_IDS, AXIS_IDS, HOMELAND_ZONES, ZONE_INFO } from '../lib/data'
   import { totalIncome } from '../lib/economy'
   import { icon } from '../lib/icons'
@@ -11,6 +11,9 @@
   let showTerritories = $state(false)
   let fixMode = $state(false)
 
+  // U8: Round label
+  let roundLabel = $derived(appState.game.round === 0 ? 'Setup' : `Round ${appState.game.round}`)
+
   function zoneIndex(nationId: NationId): number {
     return HOMELAND_ZONES.indexOf(appState.game.nations[nationId].zone)
   }
@@ -18,6 +21,40 @@
   function territoryCount(nationId: NationId): number {
     return Object.values(appState.game.territories).filter(t => t.owner === nationId).length
   }
+
+  // F10: Embattled territory count
+  function embattledCount(nationId: NationId): number {
+    return Object.values(appState.game.territories).filter(t => t.owner === nationId && t.embattled).length
+  }
+
+  // F3: Track previous resource values for flash animation
+  // prevResources is intentionally NOT $state — must not be tracked by $effect
+  let prevResources: Record<string, { oil: number; iron: number; osr: number }> =
+    Object.fromEntries(Object.entries(appState.game.nations).map(([id, ns]) => [id, { oil: ns.oil, iron: ns.iron, osr: ns.osr }]))
+  let flashClasses: Record<string, string> = $state({})
+
+  $effect(() => {
+    const nations = appState.game.nations
+    const newFlash: Record<string, string> = {}
+    for (const id of [...ALLIED_IDS, ...AXIS_IDS]) {
+      for (const r of ['oil', 'iron', 'osr'] as const) {
+        const key = `${id}-${r}`
+        const cur = nations[id][r]
+        const prev = prevResources[id]?.[r]
+        if (prev !== undefined && cur !== prev) {
+          newFlash[key] = cur > prev ? 'flash-up' : 'flash-down'
+        }
+      }
+    }
+    // Update prev snapshot outside reactive read
+    for (const id of [...ALLIED_IDS, ...AXIS_IDS]) {
+      prevResources[id] = { oil: nations[id].oil, iron: nations[id].iron, osr: nations[id].osr }
+    }
+    if (Object.keys(newFlash).length > 0) {
+      flashClasses = { ...newFlash }
+      setTimeout(() => flashClasses = {}, 700)
+    }
+  })
 
   function confirmReset() {
     resetGame()
@@ -28,6 +65,10 @@
     const game = structuredClone($state.snapshot(appState.game))
     ;(game.nations[id] as any)[field] = value
     setState(game)
+  }
+
+  function stressMax(id: NationId): number {
+    return appState.game.nations[id].zone === 'Gray' ? 99 : NATIONS[id].stressThreshold - 1
   }
 
   function fixDelta(id: NationId, field: keyof NationState, delta: number, min: number, max: number) {
@@ -48,7 +89,14 @@
       >
         {@html icon('markers','wrench','icon-sm')} Fix State
       </button>
-      <span class="text-text-muted text-sm">Round {appState.game.round}</span>
+      <span class="text-text-muted text-sm">{roundLabel}</span>
+      {#if appState.undoStack.length > 0}
+        <button
+          class="w-8 h-8 flex items-center justify-center rounded-full bg-bg-surface-alt text-text-muted active:bg-accent/30 [&>svg]:w-4 [&>svg]:h-4"
+          aria-label="Undo"
+          onclick={undo}
+        >{@html uiIcons.undo}</button>
+      {/if}
     </div>
   </div>
 
@@ -59,16 +107,19 @@
         {@const nation = NATIONS[id]}
         {@const ns = appState.game.nations[id]}
         {@const zi = ZONE_INFO[ns.zone]}
-        <div class="rounded-lg px-3 py-2 bg-bg-surface">
+        {@const emb = embattledCount(id)}
+        <!-- F9: Nation color-coded left border -->
+        <div class="rounded-lg px-3 py-2 bg-bg-surface border-l-4" style="border-color: var(--color-nation-{id})">
           <div class="flex items-center gap-3">
-            <div class="w-2 h-8 rounded-full" style="background: var(--color-nation-{id})"></div>
+            <!-- U9: Nation flag icon instead of colored bar -->
+            <span class="[&>span]:!inline-flex">{@html icon('nations', id, 'icon-sm')}</span>
             <div class="flex-1 min-w-0">
               <div class="font-medium text-sm truncate">{nation.name}</div>
               <div class="flex items-center gap-3 text-xs text-text-muted mt-0.5">
-                <span class="inline-flex items-center gap-0.5">{@html icon('resources','oil','icon-xs')} {ns.oil}</span>
-                <span class="inline-flex items-center gap-0.5">{@html icon('resources','iron','icon-xs')} {ns.iron}</span>
-                <span class="inline-flex items-center gap-0.5">{@html icon('resources','osr','icon-xs')} {ns.osr}</span>
-                <span class="inline-flex items-center gap-0.5">{@html icon('ui','territory','icon-xs')} {territoryCount(id)}</span>
+                <span class="inline-flex items-center gap-0.5 {flashClasses[`${id}-oil`] ?? ''}">{@html icon('resources','oil','icon-xs')} {ns.oil}</span>
+                <span class="inline-flex items-center gap-0.5 {flashClasses[`${id}-iron`] ?? ''}">{@html icon('resources','iron','icon-xs')} {ns.iron}</span>
+                <span class="inline-flex items-center gap-0.5 {flashClasses[`${id}-osr`] ?? ''}">{@html icon('resources','osr','icon-xs')} {ns.osr}</span>
+                <span class="inline-flex items-center gap-0.5">{@html icon('ui','territory','icon-xs')} {territoryCount(id)}{#if emb > 0}<span class="text-danger ml-0.5" title="{emb} embattled">!{emb}</span>{/if}</span>
                 <span class="inline-flex items-center gap-0.5">{@html icon('markers','medal','icon-xs')} {ns.medals}</span>
                 <span class="inline-flex items-center gap-0.5">{@html icon('markers','civilian-goods','icon-xs')} {ns.civilianGoods}</span>
               </div>
@@ -116,15 +167,15 @@
                 <button
                   class="w-8 h-8 flex items-center justify-center rounded bg-bg-surface-alt text-text-primary active:bg-accent/30 disabled:opacity-30"
                   disabled={ns.stress <= 0}
-                  onclick={() => fixDelta(id, 'stress', -1, 0, nation.stressThreshold)}
+                  onclick={() => fixDelta(id, 'stress', -1, 0, stressMax(id))}
                 >{@html uiIcons.minus}</button>
                 <span class="w-8 text-center font-bold tabular-nums text-sm">{ns.stress}</span>
                 <button
                   class="w-8 h-8 flex items-center justify-center rounded bg-bg-surface-alt text-text-primary active:bg-accent/30 disabled:opacity-30"
-                  disabled={ns.stress >= nation.stressThreshold}
-                  onclick={() => fixDelta(id, 'stress', 1, 0, nation.stressThreshold)}
+                  disabled={ns.stress >= stressMax(id)}
+                  onclick={() => fixDelta(id, 'stress', 1, 0, stressMax(id))}
                 >{@html uiIcons.plus}</button>
-                <span class="text-[10px] text-text-muted">/ {nation.stressThreshold}</span>
+                <span class="text-[10px] text-text-muted">/ {ns.zone === 'Gray' ? '\u221E' : nation.stressThreshold - 1}</span>
               </div>
 
               <!-- Medals -->
@@ -169,7 +220,7 @@
                 <div class="flex gap-1">
                   {#each HOMELAND_ZONES as z}
                     <button
-                      class="w-7 h-7 rounded text-[9px] font-bold {ns.zone === z ? 'ring-2 ring-white' : 'opacity-50'}"
+                      class="w-7 h-7 rounded text-[9px] font-bold {ns.zone === z ? 'ring-2 ring-white' : 'ring-1 ring-white/20 opacity-50'}"
                       style="background: var(--color-zone-{z}); color: {z === 'White' || z === 'Yellow' ? '#1a1a1a' : '#fff'}"
                       onclick={() => fixNation(id, 'zone', z)}
                     >{z[0]}</button>
@@ -190,7 +241,7 @@
       onclick={() => showTerritories = !showTerritories}
     >
       Territories
-      <span class="text-xs">{showTerritories ? '▲' : '▼'}</span>
+      <span class="text-xs">{showTerritories ? '\u25B2' : '\u25BC'}</span>
     </button>
     {#if showTerritories}
       <Territories />

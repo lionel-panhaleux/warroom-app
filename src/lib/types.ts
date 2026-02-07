@@ -67,6 +67,12 @@ export interface NationState {
   casualtyPoints: number
 }
 
+export interface TurnOrderEntry {
+  nationId: NationId
+  amount: number
+  tied: boolean
+}
+
 export interface GameState {
   round: number
   roundPhase: RoundPhase
@@ -75,6 +81,7 @@ export interface GameState {
   neutralInvasionHistory: Partial<Record<NationId, string[]>> // permanent: territory codes invaded per nation
   neutralInvasionsThisRound: Partial<Record<NationId, number>> // count per nation, reset each round
   pactBroken: boolean // Soviet-Japanese Non-Aggression Pact (one-time, permanent)
+  turnOrder: TurnOrderEntry[] | null // persisted from oil bidding
 }
 
 export interface AppState {

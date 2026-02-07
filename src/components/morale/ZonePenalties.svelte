@@ -17,6 +17,13 @@
   const hasBlue = $derived(zi >= 1)
   const unrestAssigned = $derived(decisions.unrestPay.oil + decisions.unrestPay.iron + decisions.unrestPay.osr)
 
+  // Auto-prefill 3 OSR when entering Blue+ zone
+  $effect(() => {
+    if (hasBlue && unrestAssigned === 0) {
+      decisions.unrestPay = { oil: 0, iron: 0, osr: 3 }
+    }
+  })
+
   function unrestInc(r: keyof ResourceBundle) {
     if (unrestAssigned >= 3) return
     decisions.unrestPay = { ...decisions.unrestPay, [r]: decisions.unrestPay[r] + 1 }
@@ -24,9 +31,6 @@
   function unrestDec(r: keyof ResourceBundle) {
     if (decisions.unrestPay[r] <= 0) return
     decisions.unrestPay = { ...decisions.unrestPay, [r]: decisions.unrestPay[r] - 1 }
-  }
-  function enableUnrest() {
-    decisions.unrestPay = { oil: 0, iron: 0, osr: 3 }
   }
   function clearUnrest() {
     decisions.unrestPay = { oil: 0, iron: 0, osr: 0 }
@@ -57,31 +61,25 @@
       <div class="mt-2 p-2 rounded bg-bg-surface-alt space-y-1.5">
         <div class="flex items-center gap-2 text-xs">
           <span class="font-semibold" style="color:var(--color-zone-Blue)">Unrest (3):</span>
-          {#if unrestAssigned === 0}
-            <button class="text-xs px-3 py-1.5 rounded bg-zone-Blue/15 text-zone-Blue"
-              onclick={enableUnrest}>Pay 3</button>
-            <span class="text-text-muted text-[10px]">(optional if unable)</span>
-          {:else}
-            {#each (['oil', 'iron', 'osr'] as const) as r}
-              {@const color = r === 'oil' ? 'var(--color-res-oil)' : r === 'iron' ? 'var(--color-res-iron)' : 'var(--color-res-osr)'}
-              <span class="flex items-center gap-0.5">
-                {@html icon('resources', r, 'icon-xs')}
-                <button class="w-7 h-7 flex items-center justify-center rounded bg-bg-primary disabled:opacity-30 text-xs"
-                  aria-label="Decrease {r}"
-                  disabled={decisions.unrestPay[r] <= 0}
-                  onclick={() => unrestDec(r)}>-</button>
-                <span class="w-4 text-center tabular-nums font-bold" style="color:{color}">{decisions.unrestPay[r]}</span>
-                <button class="w-7 h-7 flex items-center justify-center rounded bg-bg-primary disabled:opacity-30 text-xs"
-                  aria-label="Increase {r}"
-                  disabled={unrestAssigned >= 3}
-                  onclick={() => unrestInc(r)}>+</button>
-              </span>
-            {/each}
-            {#if unrestAssigned < 3}
-              <span class="text-danger text-[10px]">({3 - unrestAssigned} left)</span>
-            {/if}
-            <button class="text-[10px] text-text-muted underline px-1 py-1" onclick={clearUnrest}>clear</button>
+          {#each (['oil', 'iron', 'osr'] as const) as r}
+            {@const color = r === 'oil' ? 'var(--color-res-oil)' : r === 'iron' ? 'var(--color-res-iron)' : 'var(--color-res-osr)'}
+            <span class="flex items-center gap-0.5">
+              {@html icon('resources', r, 'icon-xs')}
+              <button class="w-7 h-7 flex items-center justify-center rounded bg-bg-primary disabled:opacity-30 text-xs"
+                aria-label="Decrease {r}"
+                disabled={decisions.unrestPay[r] <= 0}
+                onclick={() => unrestDec(r)}>-</button>
+              <span class="w-4 text-center tabular-nums font-bold" style="color:{color}">{decisions.unrestPay[r]}</span>
+              <button class="w-7 h-7 flex items-center justify-center rounded bg-bg-primary disabled:opacity-30 text-xs"
+                aria-label="Increase {r}"
+                disabled={unrestAssigned >= 3}
+                onclick={() => unrestInc(r)}>+</button>
+            </span>
+          {/each}
+          {#if unrestAssigned < 3}
+            <span class="text-danger text-[10px]">({3 - unrestAssigned} left)</span>
           {/if}
+          <button class="text-[10px] text-text-muted underline px-1 py-1" onclick={clearUnrest}>skip</button>
         </div>
         {#if unrestAssigned === 3}
           <p class="text-[10px] text-text-muted">
