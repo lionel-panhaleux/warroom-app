@@ -38,17 +38,24 @@ index.html          App shell
 manifest.json       PWA manifest
 sw.js               Service worker (offline caching)
 css/style.css       Styles (mobile-first)
-js/app.js           App init and navigation
-js/state.js         Game state (localStorage)
+js/app.js           App init and tab routing
+js/state.js         Game state (localStorage + undo)
 js/data.js          Static game data
-js/phases/          Phase-specific modules
+js/ui.js            Shared UI helpers
+js/phases/          Tab modules (dashboard, economy, battle, morale)
 ```
 
 ## Game Reference
 
 - `references/game-overview.md` — Condensed mechanics relevant to the app
+- `references/game-data.md` — Nations, unit costs, zones, thresholds
+- `references/complete_rules.md` — Full rules (parsed from PDF)
 - `references/WR_RULES_2ND_EDITION_V27u-compressed.pdf` — Official rulebook
 - `references/War_Room_FAQ_v2_2023.pdf` — Official FAQ & errata
+
+## Development
+
+See [`PLAN.md`](PLAN.md) for the development roadmap and progress tracker.
 
 ## Scope
 

@@ -617,13 +617,13 @@ In Turn Order, each Nation processes its Casualty List:
 | Unit Type | Casualty Points |
 |---|---|
 | Infantry | 2 |
-| Artillery | 6 |
-| Armor | 8 |
-| Fighter | 6 |
+| Artillery | 2 |
+| Armor | 4 |
+| Fighter | 4 |
 | Bomber | 6 |
 | Submarine | 6 |
 | Cruiser | 10 |
-| Carrier | 18 |
+| Carrier | 20 |
 | Battleship | 20 |
 
 *Example from rules: the loss of 1 Battleship (20) and 1 Bomber (6) = 26 Casualty Points → 1 Stress Point.*
@@ -632,12 +632,12 @@ In Turn Order, each Nation processes its Casualty List:
 
 | Casualty Points | Stress |
 |---|---|
-| 0–17 | 0 |
-| 18–33 | 1 |
-| 34–49 | 2 |
-| 50–62 | 3 |
-| 63–87 | 4 |
-| 88–109 | 5 |
+| 0–19 | 0 |
+| 20–35 | 1 |
+| 36–51 | 2 |
+| 52–69 | 3 |
+| 70–89 | 4 |
+| 90–109 | 5 |
 | 110+ | 6 (max from casualties per round) |
 
 No more than **6 Stress Points** may be gained from Casualty Points by a Nation in a single round.
@@ -693,18 +693,18 @@ Nations simultaneously and secretly decide purchases on the Production side of t
 
 | Unit | Oil | Iron | OSR | Total Resources |
 |---|---|---|---|---|
-| Infantry | 0 | 1 | 1 | 2 |
-| Artillery | 1 | 1 | 1 | 3 |
+| Infantry | 0 | 0 | 2 | 2 |
+| Artillery | 0 | 2 | 1 | 3 |
 | Armor | 1 | 2 | 1 | 4 |
-| Fighter | 1 | 1 | 1 | 3 |
-| Bomber | 2 | 1 | 1 | 4 |
-| Submarine | 1 | 1 | 1 | 3 |
-| Cruiser | 1 | 2 | 1 | 4 |
-| Carrier | 2 | 3 | 1 | 6 |
-| Battleship | 2 | 3 | 2 | 7 |
+| Fighter | 2 | 1 | 1 | 4 |
+| Bomber | 2 | 2 | 1 | 5 |
+| Submarine | 1 | 2 | 1 | 4 |
+| Cruiser | 2 | 3 | 2 | 7 |
+| Carrier | 4 | 3 | 3 | 10 |
+| Battleship | 3 | 4 | 3 | 10 |
 | Civilian Goods | any 5 total (mixed) | | | 5 |
 
-*Example: 2 Fighters cost 2 Oil, 2 Iron, and 2 OSR.*
+*Example: 2 Fighters cost 4 Oil, 2 Iron, and 2 OSR.*
 
 **Civilian Goods** cost 5 Resources of any Type (may be mixed). Place new Civilian Goods immediately on the Morale Board's "Medals" box for that Nation.
 

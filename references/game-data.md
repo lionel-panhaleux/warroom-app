@@ -1,6 +1,6 @@
 # War Room — Game Data Tables
 
-All values verified against 2nd Edition rulebook (2025 update) and FAQ v2.
+All values verified against 2nd Edition rulebook (2025 update), FAQ v2, and physical game components.
 
 ---
 
@@ -34,20 +34,21 @@ Trade is Global War only, 1 trade per nation per round, during Phase 7 Step 2.
 
 | Unit | Oil | Iron | OSR | Total Cost | Casualty Pts | Category |
 |---|---|---|---|---|---|---|
-| Infantry | 0 | 1 | 1 | 2 | 2 | Land |
-| Artillery | 1 | 1 | 1 | 3 | 6 | Land |
-| Armor | 1 | 2 | 1 | 4 | 8 | Land |
-| Fighter | 1 | 1 | 1 | 3 | 6 | Air |
-| Bomber | 2 | 1 | 1 | 4 | 6 | Air |
-| Submarine | 1 | 1 | 1 | 3 | 6 | Naval |
-| Cruiser | 1 | 2 | 1 | 4 | 10 | Naval |
-| Carrier | 2 | 3 | 1 | 6 | 18 | Naval |
-| Battleship | 2 | 3 | 2 | 7 | 20 | Naval |
+| Infantry | 0 | 0 | 2 | 2 | 2 | Land |
+| Artillery | 0 | 2 | 1 | 3 | 2 | Land |
+| Armor | 1 | 2 | 1 | 4 | 4 | Land |
+| Fighter | 2 | 1 | 1 | 4 | 4 | Air |
+| Bomber | 2 | 2 | 1 | 5 | 6 | Air |
+| Submarine | 1 | 2 | 1 | 4 | 6 | Naval |
+| Cruiser | 2 | 3 | 2 | 7 | 10 | Naval |
+| Carrier | 4 | 3 | 3 | 10 | 20 | Naval |
+| Battleship | 3 | 4 | 3 | 10 | 20 | Naval |
 | Civilian Goods | any 5 total (mixed) | | | 5 | — | — |
 
 *Carrier Fighters*: no cost (1 per Carrier per round). Eliminated Carrier Fighters go to the Casualty List (treated as Air Units for casualty points).
 
-*Verified from rules example: 1 Battleship (20) + 1 Bomber (6) = 26 Casualty Points → 1 Stress Point.*
+*Verified from rules p.21 example: 1 Battleship (20) + 1 Bomber (6) = 26 Casualty Points → 1 Stress Point.*
+*Verified from rules p.22 example: 2 Fighters cost 4 Oil, 2 Iron, 2 OSR.*
 
 ---
 
@@ -103,12 +104,12 @@ Penalties are **cumulative** and **recurring** each round.
 
 | Casualty Points | Stress |
 |---|---|
-| 0–17 | 0 |
-| 18–33 | 1 |
-| 34–49 | 2 |
-| 50–62 | 3 |
-| 63–87 | 4 |
-| 88–109 | 5 |
+| 0–19 | 0 |
+| 20–35 | 1 |
+| 36–51 | 2 |
+| 52–69 | 3 |
+| 70–89 | 4 |
+| 90–109 | 5 |
 | 110+ | 6 (max per round) |
 
 ---
@@ -214,24 +215,36 @@ Conversion: **5 CP → 1 Stress** (drop remainder). Max 6 stress from casualties
 
 ## Trade with Neutrals (Global War only)
 
-### Standard Neutrals with Trade
+### Trading Neutrals
 
-| Neutral | Defense Force | Trades |
-|---|---|---|
-| Arabia | 3 Infantry | Oil |
-| Colombia | 4 Infantry | OSR |
-| Spain | 6 Inf, 2 Art, 1 Ftr | OSR |
-| Sweden | 4 Inf, 1 Art, 1 Ftr | Iron |
-| Venezuela | 4 Infantry | Oil |
-
-### Pro-Allied Neutrals with Trade
-
-| Neutral | Defense Force | Trades |
-|---|---|---|
-| Brazil | 4 Inf, 2 Art, 1 Ftr | Iron |
-| Mexico | 3 Inf, 1 Art | Iron |
+| Neutral | Alignment | Defense Force | Trades |
+|---|---|---|---|
+| Arabia (N15) | Neutral | 3 Inf | Oil |
+| Colombia (N4) | Neutral | 4 Inf | OSR |
+| Spain (N11) | Neutral | 1 Ftr, 2 Art, 6 Inf | OSR |
+| Sweden (N10) | Neutral | 1 Ftr, 1 Art, 4 Inf | Iron |
+| Venezuela (N5) | Neutral | 4 Inf | Oil |
+| Brazil (N6) | Pro-Allied | 1 Ftr, 2 Art, 4 Inf | Iron |
+| Mexico (N1) | Pro-Allied | 1 Art, 3 Inf | Iron |
 
 Neutrals accept only 1 of the other 2 Resource Types (e.g., Mexico offers Iron, accepts only Oil or OSR).
+
+### Non-Trading Neutrals
+
+| Neutral | Alignment | Defense Force |
+|---|---|---|
+| Central America (N2) | Pro-Allied | — |
+| West Indies (N3) | Pro-Allied | — |
+| Greenland (N7) | Pro-Allied | — |
+| Iceland (N8) | Pro-Allied | — |
+| Ireland (N9) | Neutral | 3 Inf |
+| Portugal (N12) | Neutral | 4 Inf |
+| Switzerland (N13) | Neutral | 3 Inf |
+| Turkey (N14) | Neutral | 1 Ftr, 2 Art, 6 Inf |
+| Angola (N16) | Neutral | 3 Inf |
+| Mozambique (N17) | Neutral | 3 Inf |
+| Afghanistan (N18) | Neutral | 4 Inf |
+| Mongolia (N19) | Neutral | 3 Inf |
 
 ---
 
@@ -265,3 +278,45 @@ Cost: **9 Iron** per Bomb Token removed. Max 1 per round. Announced during Phase
 | War in the Pacific | Control (E. Australia OR India) AND 1 of (Hawaii, Alaska, W. US) | Control Japan |
 | North Africa | Control Egypt + Middle East, OR capture E. US or Great Britain | Control Italy, OR all 5 Med-adjacent African territories |
 | Eastern Front | Control both Capitals at end of Morale Phase | Control both Capitals at end of Morale Phase |
+
+---
+
+## Embattlement
+
+When a territory is **embattled**, each of its resources is reduced by 1 (flip Territory Card to embattled side showing red/white stripes). A resource at 0 stays at 0.
+- Only Solomon Islands (J25) is embattled at game start
+- Industry production limit = SV (minus Bomb Tokens and Deferred Units). See rulebook p.5.
+
+---
+
+## Cross-Oceanic Convoy Routes
+
+| Sea Region | Owner | Resources |
+|---|---|---|
+| A3 | USA | Oil ×1, OSR ×1 |
+| A8 | UK | Oil ×1, Iron ×1, OSR ×1 |
+| A9 | USA | Oil ×1, Iron ×1, OSR ×3 |
+
+Convoys are collected during Phase 1 (Economy) if the sea region is free of enemy naval units.
+
+---
+
+## Sea Regions (56 total)
+
+| Ocean | Regions | Count |
+|---|---|---|
+| Atlantic | A1–A19 | 19 |
+| Mediterranean | M1–M6 | 6 |
+| Indian | I1–I10 | 10 |
+| Pacific | P0–P20 | 21 |
+
+---
+
+## Impassable Terrain
+
+| Name | Neighboring Territories |
+|---|---|
+| Western Sahara | French Morocco, Algeria, French West Africa |
+| Central Sahara | Algeria, Tunisia, Libya, Nigeria Cameroon, Gold Coast, French West Africa |
+| Eastern Sahara | Libya, Egypt, Sudan, French Equatorial Africa, Nigeria Cameroon |
+| Himalaya | India, Afghanistan, Turkmen Uzbek, Szechwan Yunnan, Tsinghai Ningsia, Sinkiang, Burma |

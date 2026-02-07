@@ -16,11 +16,12 @@ Vanilla JS, no build step, no deps. Single index.html, service worker, localStor
 ```
 index.html / manifest.json / sw.js
 css/style.css
-js/app.js          init + routing
-js/state.js        localStorage state
-js/data.js         static game data (nations, costs, thresholds)
-js/phases/         phase-specific modules
-references/        rules PDFs + game-overview.md + game-data.md
+js/app.js          init + tab routing
+js/state.js        localStorage, getState/setState, undo
+js/data.js         static game data (nations, costs, thresholds, zones)
+js/ui.js           shared UI helpers
+js/phases/         tab modules (dashboard, economy, battle, morale)
+references/        rules PDFs + parsed markdown refs
 ```
 
 ## Conventions
@@ -29,8 +30,11 @@ references/        rules PDFs + game-overview.md + game-data.md
 - Central `setState()`/`getState()` pattern
 - Small pure functions, comments only where non-obvious
 - No external deps, test on mobile Safari + Chrome
+- Always use context7 MCP for technical documentation lookups
 
-## Key rules refs
+## Key refs
+- `PLAN.md` — development roadmap & progress tracker
 - `references/game-overview.md` — condensed mechanics
 - `references/game-data.md` — nations, unit costs, zones, thresholds
+- `references/complete_rules.md` — full rules (parsed from PDF)
 - `references/*.pdf` — official rulebook + FAQ
