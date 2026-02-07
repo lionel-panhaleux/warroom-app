@@ -47,6 +47,7 @@ export const uiIcons: Record<string, string> = {
   minus: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor"><path d="M4 14h24v4H4z"/></svg>`,
   undo: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor"><path d="M12 6L4 14l8 8v-5c7 0 12 2 16 8-1-9-6-14-16-15z"/></svg>`,
   trade: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor"><path d="M4 10l6-6v4h16v4H10v4zm18 8l6 6-6 6v-4H6v-4h16z"/></svg>`,
+  territory: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor"><path fill-rule="evenodd" d="M16 2C10.48 2 6 6.48 6 12c0 7.5 10 18 10 18s10-10.5 10-18c0-5.52-4.48-10-10-10zm0 14a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/></svg>`,
 };
 
 /** All icons grouped by category */

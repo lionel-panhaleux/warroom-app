@@ -283,21 +283,11 @@ Cost: **9 Iron** per Bomb Token removed. Max 1 per round. Announced during Phase
 
 ## Embattlement
 
-When a territory is **embattled**, each of its resources is reduced by 1 (flip Territory Card to embattled side showing red/white stripes). A resource at 0 stays at 0.
+When a territory is **embattled**, each of its resources is reduced by 1 (min 0). Flip Territory Card to embattled side (red/white stripes). A resource at 0 stays at 0.
 - Only Solomon Islands (J25) is embattled at game start
 - Industry production limit = SV (minus Bomb Tokens and Deferred Units). See rulebook p.5.
 
 ---
-
-## Cross-Oceanic Convoy Routes
-
-| Sea Region | Owner | Resources |
-|---|---|---|
-| A3 | USA | Oil ×1, OSR ×1 |
-| A8 | UK | Oil ×1, Iron ×1, OSR ×1 |
-| A9 | USA | Oil ×1, Iron ×1, OSR ×3 |
-
-Convoys are collected during Phase 1 (Economy) if the sea region is free of enemy naval units.
 
 ---
 

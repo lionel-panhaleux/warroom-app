@@ -38,6 +38,15 @@ export const CASUALTY_BRACKETS: CasualtyBracket[] = [
 
 export const HOMELAND_ZONES: HomelandZone[] = ['White', 'Blue', 'Yellow', 'Orange', 'Red', 'Gray']
 
+export const ZONE_INFO: Record<HomelandZone, { name: string; effect: string }> = {
+  White: { name: 'Acceptable', effect: 'No penalty' },
+  Blue: { name: 'Unrest', effect: 'Pay 3 resources (any mix)' },
+  Yellow: { name: 'Dysfunctional', effect: 'No rails, no sea trade, no port advantage' },
+  Orange: { name: 'Disrupted', effect: '3 fewer written orders' },
+  Red: { name: 'Collapse', effect: 'No new resource income' },
+  Gray: { name: 'Desertion', effect: 'Remove units from map equal to stress' },
+}
+
 export const RESOURCES = {
   oil:  { label: 'Oil',  tradeRate: 2, color: '#e74c3c' },
   iron: { label: 'Iron', tradeRate: 3, color: '#3498db' },
