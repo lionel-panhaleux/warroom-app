@@ -163,6 +163,7 @@
       <input
         type="text"
         class="w-full bg-bg-surface-alt rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted/50 outline-none focus:ring-1 focus:ring-accent"
+        aria-label="Search battle location"
         placeholder="Search territory..."
         bind:value={locationSearch}
       />
@@ -170,7 +171,7 @@
         <div class="space-y-1 max-h-48 overflow-y-auto">
           {#each searchResults as t}
             <button
-              class="w-full text-left px-3 py-1.5 rounded-md text-xs bg-bg-surface-alt/50 hover:bg-accent/10 active:bg-accent/20 flex justify-between items-center"
+              class="w-full text-left px-3 py-2 rounded-md text-xs bg-bg-surface-alt/50 hover:bg-accent/10 active:bg-accent/20 flex justify-between items-center"
               onclick={() => selectLocation(t.code)}
             >
               <span><span class="font-mono text-text-muted mr-1">{t.code}</span> {t.name}</span>
@@ -193,14 +194,14 @@
             <span class="text-sm font-medium">{locationDef.name}</span>
             <span class="text-xs text-text-muted ml-1">SV {locationDef.sv}</span>
             {#if locationDef.notes?.includes('Capital')}
-              <span class="text-xs text-yellow-400 ml-1">{@html icon('markers', 'medal', 'icon-xs')} Capital</span>
+              <span class="text-xs text-warning ml-1">{@html icon('markers', 'medal', 'icon-xs')} Capital</span>
             {/if}
           </div>
           <div class="text-[10px] text-text-muted text-right">
             {#if locationState}
               Owner: {locationState.owner ?? 'Neutral'}
               {#if locationState.embattled}
-                <span class="text-red-400 ml-1">Embattled</span>
+                <span class="text-danger ml-1">Embattled</span>
               {/if}
             {/if}
           </div>
@@ -208,7 +209,7 @@
         <button class="text-xs text-accent ml-2" onclick={resetAll}>Change</button>
       </div>
       {#if neutralInvasion && outcome === 'changes-hands'}
-        <p class="text-[10px] text-yellow-400">Neutral invasion: +1 stress to attacker</p>
+        <p class="text-[10px] text-warning">Neutral invasion: +1 stress to attacker</p>
       {/if}
     {/if}
   </section>
@@ -262,7 +263,7 @@
         <div class="flex gap-1.5">
           {#each [['changes-hands', 'Changes Hands'], ['embattled', 'Stays Embattled'], ['no-change', 'No Change']] as [val, label]}
             <button
-              class="flex-1 text-[11px] py-2 rounded-lg transition-colors
+              class="flex-1 text-xs py-2.5 rounded-lg transition-colors
                      {outcome === val ? 'bg-accent text-bg-primary' : 'bg-bg-surface-alt text-text-muted'}"
               onclick={() => outcome = val as Outcome}
             >{label}</button>
@@ -308,7 +309,7 @@
             {/if}
 
             {#if locationState?.owner && svStress > 0}
-              <p class="text-[10px] text-red-400">
+              <p class="text-[10px] text-danger">
                 {locationState.owner} receives +{svStress} stress (SV of {locationDef?.name})
               </p>
             {/if}
@@ -354,7 +355,7 @@
 
     <!-- Step 5: Apply -->
     <button
-      class="w-full py-2.5 rounded-lg font-semibold text-sm transition-colors
+      class="w-full py-3 rounded-lg font-semibold text-sm transition-colors
              {canApply ? 'bg-accent text-bg-primary active:bg-accent-dim' : 'bg-bg-surface-alt text-text-muted'}"
       disabled={!canApply}
       onclick={applyBattle}

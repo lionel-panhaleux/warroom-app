@@ -37,7 +37,7 @@
   <h3 class="text-sm font-semibold text-text-muted uppercase tracking-wide">Penalties</h3>
 
   {#if zi === 0}
-    <p class="text-sm text-green-400">No penalties (White zone)</p>
+    <p class="text-sm text-success">No penalties (White zone)</p>
   {:else}
     <div class="space-y-1">
       {#each HOMELAND_ZONES.slice(1, zi + 1) as z}
@@ -58,7 +58,7 @@
         <div class="flex items-center gap-2 text-xs">
           <span class="font-semibold" style="color:var(--color-zone-Blue)">Unrest (3):</span>
           {#if unrestAssigned === 0}
-            <button class="text-[10px] px-2 py-0.5 rounded bg-blue-900/50 text-blue-300"
+            <button class="text-xs px-3 py-1.5 rounded bg-zone-Blue/15 text-zone-Blue"
               onclick={enableUnrest}>Pay 3</button>
             <span class="text-text-muted text-[10px]">(optional if unable)</span>
           {:else}
@@ -66,19 +66,21 @@
               {@const color = r === 'oil' ? 'var(--color-res-oil)' : r === 'iron' ? 'var(--color-res-iron)' : 'var(--color-res-osr)'}
               <span class="flex items-center gap-0.5">
                 {@html icon('resources', r, 'icon-xs')}
-                <button class="w-5 h-5 flex items-center justify-center rounded bg-bg-primary disabled:opacity-30 text-[8px]"
+                <button class="w-7 h-7 flex items-center justify-center rounded bg-bg-primary disabled:opacity-30 text-xs"
+                  aria-label="Decrease {r}"
                   disabled={decisions.unrestPay[r] <= 0}
                   onclick={() => unrestDec(r)}>-</button>
                 <span class="w-4 text-center tabular-nums font-bold" style="color:{color}">{decisions.unrestPay[r]}</span>
-                <button class="w-5 h-5 flex items-center justify-center rounded bg-bg-primary disabled:opacity-30 text-[8px]"
+                <button class="w-7 h-7 flex items-center justify-center rounded bg-bg-primary disabled:opacity-30 text-xs"
+                  aria-label="Increase {r}"
                   disabled={unrestAssigned >= 3}
                   onclick={() => unrestInc(r)}>+</button>
               </span>
             {/each}
             {#if unrestAssigned < 3}
-              <span class="text-red-400 text-[10px]">({3 - unrestAssigned} left)</span>
+              <span class="text-danger text-[10px]">({3 - unrestAssigned} left)</span>
             {/if}
-            <button class="text-[10px] text-text-muted underline" onclick={clearUnrest}>clear</button>
+            <button class="text-[10px] text-text-muted underline px-1 py-1" onclick={clearUnrest}>clear</button>
           {/if}
         </div>
         {#if unrestAssigned === 3}
@@ -91,7 +93,7 @@
 
     {#if zone === 'Gray' && remainingStress > 0}
       <div class="mt-2 p-2 rounded bg-bg-surface-alt text-sm">
-        <span class="text-red-400 font-semibold">Desertion:</span>
+        <span class="text-danger font-semibold">Desertion:</span>
         Remove <span class="font-bold">{remainingStress}</span> unit{remainingStress > 1 ? 's' : ''} from the map
       </div>
     {/if}

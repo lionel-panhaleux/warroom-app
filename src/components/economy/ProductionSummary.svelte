@@ -63,9 +63,9 @@
       </div>
       <div class="flex gap-2">
         <span class="text-text-muted">Left:</span>
-        <span class="{remaining.oil < 0 ? 'text-red-400' : ''}" style="color:{remaining.oil >= 0 ? 'var(--color-res-oil)' : ''}">{remaining.oil}</span>
-        <span class="{remaining.iron < 0 ? 'text-red-400' : ''}" style="color:{remaining.iron >= 0 ? 'var(--color-res-iron)' : ''}">{remaining.iron}</span>
-        <span class="{remaining.osr < 0 ? 'text-red-400' : ''}" style="color:{remaining.osr >= 0 ? 'var(--color-res-osr)' : ''}">{remaining.osr}</span>
+        <span class="{remaining.oil < 0 ? 'text-danger' : ''}" style="color:{remaining.oil >= 0 ? 'var(--color-res-oil)' : ''}">{remaining.oil}</span>
+        <span class="{remaining.iron < 0 ? 'text-danger' : ''}" style="color:{remaining.iron >= 0 ? 'var(--color-res-iron)' : ''}">{remaining.iron}</span>
+        <span class="{remaining.osr < 0 ? 'text-danger' : ''}" style="color:{remaining.osr >= 0 ? 'var(--color-res-osr)' : ''}">{remaining.osr}</span>
       </div>
     </div>
 
@@ -73,22 +73,26 @@
     <div class="flex gap-3 text-xs items-center flex-wrap">
       <span class="flex items-center gap-1">
         {@html icon('markers', 'civilian-goods', 'icon-xs')} Civ.
-        <button class="w-6 h-6 flex items-center justify-center rounded bg-bg-surface-alt disabled:opacity-30"
+        <button class="w-8 h-8 flex items-center justify-center rounded bg-bg-surface-alt disabled:opacity-30"
+          aria-label="Decrease civilian goods"
           disabled={civilianGoods <= 0}
           onclick={civGoodsDec}>{@html uiIcons.minus}</button>
         <span class="w-4 text-center tabular-nums font-bold">{civilianGoods}</span>
-        <button class="w-6 h-6 flex items-center justify-center rounded bg-bg-surface-alt disabled:opacity-30"
+        <button class="w-8 h-8 flex items-center justify-center rounded bg-bg-surface-alt disabled:opacity-30"
+          aria-label="Increase civilian goods"
           disabled={totalResources(remaining) < 5}
           onclick={civGoodsInc}>{@html uiIcons.plus}</button>
       </span>
       {#if !isChinaNoBomb}
         <span class="flex items-center gap-1">
           {@html icon('markers', 'wrench', 'icon-xs')} Bomb
-          <button class="w-6 h-6 flex items-center justify-center rounded bg-bg-surface-alt disabled:opacity-30"
+          <button class="w-8 h-8 flex items-center justify-center rounded bg-bg-surface-alt disabled:opacity-30"
+            aria-label="Decrease bomb repair"
             disabled={bombRepair <= 0}
             onclick={() => bombRepair--}>{@html uiIcons.minus}</button>
           <span class="w-4 text-center tabular-nums font-bold">{bombRepair}</span>
-          <button class="w-6 h-6 flex items-center justify-center rounded bg-bg-surface-alt disabled:opacity-30"
+          <button class="w-8 h-8 flex items-center justify-center rounded bg-bg-surface-alt disabled:opacity-30"
+            aria-label="Increase bomb repair"
             disabled={remaining.iron < 9}
             onclick={() => bombRepair++}>{@html uiIcons.plus}</button>
           <span class="text-text-muted text-[10px]">({bombRepair * 9}{@html icon('resources', 'iron', 'icon-xs')})</span>
@@ -104,25 +108,27 @@
           {@const color = r === 'oil' ? 'var(--color-res-oil)' : r === 'iron' ? 'var(--color-res-iron)' : 'var(--color-res-osr)'}
           <span class="flex items-center gap-0.5">
             {@html icon('resources', r, 'icon-xs')}
-            <button class="w-5 h-5 flex items-center justify-center rounded bg-bg-surface-alt disabled:opacity-30 text-[8px]"
+            <button class="w-7 h-7 flex items-center justify-center rounded bg-bg-surface-alt disabled:opacity-30 text-xs"
+              aria-label="Decrease {r} payment"
               disabled={civGoodsPay[r] <= 0}
               onclick={() => civDec(r)}>-</button>
             <span class="w-4 text-center tabular-nums font-bold" style="color:{color}">{civGoodsPay[r]}</span>
-            <button class="w-5 h-5 flex items-center justify-center rounded bg-bg-surface-alt disabled:opacity-30 text-[8px]"
+            <button class="w-7 h-7 flex items-center justify-center rounded bg-bg-surface-alt disabled:opacity-30 text-xs"
+              aria-label="Increase {r} payment"
               disabled={civAssigned >= civTotal}
               onclick={() => civInc(r)}>+</button>
           </span>
         {/each}
         {#if civAssigned < civTotal}
-          <span class="text-red-400">({civTotal - civAssigned} unassigned)</span>
+          <span class="text-danger">({civTotal - civAssigned} unassigned)</span>
         {/if}
       </div>
     {/if}
 
     <!-- Done with Production -->
     <button
-      class="w-full py-2 rounded-lg font-semibold text-sm transition-colors
-             {currentNationOk && allValid ? 'bg-accent text-bg-primary active:bg-accent-dim' : 'bg-red-900/50 text-red-300'}"
+      class="w-full py-3 rounded-lg font-semibold text-sm transition-colors
+             {currentNationOk && allValid ? 'bg-accent text-bg-primary active:bg-accent-dim' : 'bg-danger-dim/50 text-danger'}"
       disabled={!currentNationOk || !allValid}
       onclick={onDone}
     >{!affordable ? 'Overspent!' : civAssigned !== civTotal ? 'Assign Civ. Goods Cost' : !allValid ? 'Fix All Nations First' : 'Done with Production'}</button>

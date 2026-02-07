@@ -81,7 +81,7 @@
   <!-- New Game -->
   <div class="mt-8 mb-4">
     <button
-      class="w-full py-2.5 rounded-lg font-semibold text-sm bg-red-900/40 text-red-300 active:bg-red-900/60"
+      class="w-full py-2.5 rounded-lg font-semibold text-sm bg-danger-dim/40 text-danger active:bg-danger-dim/60"
       onclick={() => showResetModal = true}
     >New Game</button>
   </div>
@@ -97,7 +97,7 @@
   >
     <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
     <div class="bg-bg-surface rounded-xl p-5 mx-4 max-w-sm w-full shadow-xl" onclick={(e) => e.stopPropagation()}>
-      <h3 class="text-lg font-bold text-red-400 mb-2">Start New Game?</h3>
+      <h3 class="text-lg font-bold text-danger mb-2">Start New Game?</h3>
       <p class="text-sm text-text-muted mb-4">This will erase all current game data including resources, territories, and undo history. This cannot be undone.</p>
       <div class="flex gap-3">
         <button
@@ -105,7 +105,7 @@
           onclick={() => showResetModal = false}
         >Cancel</button>
         <button
-          class="flex-1 py-2.5 rounded-lg font-semibold text-sm bg-red-600 text-white active:bg-red-700"
+          class="flex-1 py-2.5 rounded-lg font-semibold text-sm bg-danger text-white active:bg-danger-dim"
           onclick={confirmReset}
         >Reset</button>
       </div>

@@ -138,6 +138,7 @@
   <input
     type="text"
     class="w-full bg-bg-surface rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted outline-none focus:ring-1 focus:ring-accent"
+    aria-label="Search territories"
     placeholder="Search territories..."
     bind:value={search}
   />

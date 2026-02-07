@@ -54,7 +54,7 @@
     </div>
 
     {#if reliefTotal > 0 && !isValid}
-      <p class="text-xs text-red-400">Must total exactly {threshold} (currently {reliefTotal})</p>
+      <p class="text-xs text-danger">Must total exactly {threshold} (currently {reliefTotal})</p>
     {/if}
 
     {#if reliefTotal === threshold}

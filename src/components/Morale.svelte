@@ -107,7 +107,7 @@
   <!-- Apply button -->
   <div class="pt-2">
     {#if validationError}
-      <p class="text-xs text-red-400 mb-2">{validationError}</p>
+      <p class="text-xs text-danger mb-2">{validationError}</p>
     {/if}
     <button
       class="w-full py-3 rounded-xl font-bold text-lg transition-colors

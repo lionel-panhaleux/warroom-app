@@ -69,7 +69,7 @@
   </section>
 
   <button
-    class="w-full py-2.5 rounded-lg font-semibold text-sm transition-colors
+    class="w-full py-3 rounded-lg font-semibold text-sm transition-colors
            {hasChanges ? 'bg-accent text-bg-primary active:bg-accent-dim' : 'bg-bg-surface-alt text-text-muted'}"
     disabled={!hasChanges}
     onclick={applyRaid}

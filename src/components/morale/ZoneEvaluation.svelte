@@ -52,12 +52,12 @@
   <div class="text-sm space-y-0.5">
     {#if advances > 0}
       <p>
-        <span class="text-red-400 font-semibold">{stressAfterCancel}</span> stress vs threshold
+        <span class="text-danger font-semibold">{stressAfterCancel}</span> stress vs threshold
         <span class="font-semibold">{threshold}</span>
-        → advance <span class="text-red-400 font-bold">{advances}</span> zone{advances > 1 ? 's' : ''}
+        → advance <span class="text-danger font-bold">{advances}</span> zone{advances > 1 ? 's' : ''}
       </p>
     {:else}
-      <p class="text-green-400">Stress below threshold — no zone advance</p>
+      <p class="text-success">Stress below threshold — no zone advance</p>
     {/if}
   </div>
 </div>

@@ -36,7 +36,7 @@
     <span class="text-text-muted">Existing stress</span>
     <span class="text-right font-bold">{ns.stress}</span>
     <span class="text-text-muted">Casualty points</span>
-    <span class="text-right">{ns.casualtyPoints} → <span class="font-bold text-red-400">+{casualtyStress}</span></span>
+    <span class="text-right">{ns.casualtyPoints} → <span class="font-bold text-danger">+{casualtyStress}</span></span>
   </div>
 
   <!-- Neutral invasions -->
@@ -45,7 +45,7 @@
     <div class="flex items-center gap-2">
       <Counter bind:value={decisions.neutralInvasionCount} min={0} max={20} />
       {#if neutralStress > 0}
-        <span class="font-bold text-red-400">+{neutralStress}</span>
+        <span class="font-bold text-danger">+{neutralStress}</span>
       {/if}
     </div>
   </div>
@@ -56,12 +56,12 @@
       <span class="text-text-muted">Break Soviet-Japanese Pact</span>
       <div class="flex items-center gap-2">
         <button
-          class="px-2 py-0.5 rounded text-xs font-semibold transition-colors
-                 {decisions.breakPact ? 'bg-red-500/20 text-red-400 ring-1 ring-red-500/50' : 'bg-bg-surface-alt text-text-muted'}"
+          class="px-3 py-1.5 rounded text-xs font-semibold transition-colors
+                 {decisions.breakPact ? 'bg-danger-dim/50 text-danger ring-1 ring-danger/50' : 'bg-bg-surface-alt text-text-muted'}"
           onclick={() => decisions.breakPact = !decisions.breakPact}
         >{decisions.breakPact ? 'YES' : 'No'}</button>
         {#if pactStress > 0}
-          <span class="font-bold text-red-400">+{pactStress}</span>
+          <span class="font-bold text-danger">+{pactStress}</span>
         {/if}
       </div>
     </div>
@@ -70,7 +70,7 @@
   <!-- Total -->
   <div class="grid grid-cols-2 gap-x-4 text-sm">
     <span class="text-text-muted font-semibold">Total stress</span>
-    <span class="text-right font-bold text-red-400">{totalStress}</span>
+    <span class="text-right font-bold text-danger">{totalStress}</span>
   </div>
 
   <!-- Cancellation -->
@@ -92,12 +92,12 @@
 
       <p class="text-sm">
         Stress after cancellation:
-        <span class="font-bold {remainingAfterMedals - decisions.cgToSpend > 0 ? 'text-red-400' : 'text-green-400'}">
+        <span class="font-bold {remainingAfterMedals - decisions.cgToSpend > 0 ? 'text-danger' : 'text-success'}">
           {Math.max(0, remainingAfterMedals - decisions.cgToSpend)}
         </span>
       </p>
     </div>
   {:else}
-    <p class="text-sm text-green-400">No stress this round</p>
+    <p class="text-sm text-success">No stress this round</p>
   {/if}
 </div>

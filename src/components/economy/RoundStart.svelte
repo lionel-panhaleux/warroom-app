@@ -78,7 +78,7 @@
               <td class="py-1.5 px-2 flex items-center gap-1.5">
                 {@html icon('nations', id, 'icon-xs')}
                 <span class="font-medium">{NATIONS[id].name}</span>
-                {#if redZone}<span class="text-red-400 text-[10px] ml-1">NO INCOME</span>{/if}
+                {#if redZone}<span class="text-danger text-[10px] ml-1">NO INCOME</span>{/if}
               </td>
               <td class="text-right px-1 tabular-nums">{redZone ? 0 : income.oil}</td>
               <td class="text-right px-1 tabular-nums">{redZone ? 0 : income.iron}</td>
@@ -89,7 +89,7 @@
       </table>
     </div>
     <button
-      class="w-full mt-2 py-2.5 rounded-lg font-semibold text-sm transition-colors
+      class="w-full mt-2 py-3 rounded-lg font-semibold text-sm transition-colors
              {phase !== 'income' ? 'bg-bg-surface-alt text-text-muted' : 'bg-accent text-bg-primary active:bg-accent-dim'}"
       disabled={phase !== 'income'}
       onclick={collectIncome}
@@ -118,7 +118,7 @@
     </div>
 
     {#if bidError}
-      <p class="text-red-400 text-xs mt-2">{bidError}</p>
+      <p class="text-danger text-xs mt-2">{bidError}</p>
     {/if}
 
     {#if (phase === 'morale' || phase === 'production') && turnOrder}
@@ -131,7 +131,7 @@
               {@html icon('nations', entry.nationId, 'icon-xs')}
               <span class="font-medium">{NATIONS[entry.nationId].name}</span>
               <span class="text-text-muted">({entry.amount} Oil)</span>
-              {#if entry.tied}<span class="text-yellow-400 text-[10px]">TIE</span>{/if}
+              {#if entry.tied}<span class="text-warning text-[10px]">TIE</span>{/if}
             </li>
           {/each}
         </ol>
@@ -139,7 +139,7 @@
       </div>
     {:else if phase === 'bidding'}
       <button
-        class="w-full mt-2 py-2.5 rounded-lg font-semibold text-sm bg-accent text-bg-primary active:bg-accent-dim"
+        class="w-full mt-2 py-3 rounded-lg font-semibold text-sm bg-accent text-bg-primary active:bg-accent-dim"
         onclick={confirmBids}
       >Confirm Bids</button>
     {/if}
