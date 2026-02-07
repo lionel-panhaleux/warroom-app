@@ -53,6 +53,9 @@ export const RESOURCES = {
   osr:  { label: 'OSR',  tradeRate: 5, color: '#f1c40f' },
 } as const
 
+// Capitals: 3 medals when captured (J4 = Peiping for Chinese capital purposes)
+export const CAPITALS = new Set(['U1', 'B1', 'R1', 'G1', 'J1', 'T1', 'J4'])
+
 export function casualtyToStress(cp: number): number {
   for (const b of CASUALTY_BRACKETS) {
     if (cp <= b.max) return b.stress

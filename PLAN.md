@@ -29,6 +29,7 @@ src/
   lib/data.ts                Static game data (nations, units, brackets, zones)
   lib/territories.ts         131 territory definitions
   lib/economy.ts             Income, trade, production helpers
+  lib/battle.ts              Battle CP calculation, medal count, neutral invasion
   lib/state.svelte.ts        Reactive state ($state), localStorage, undo
   lib/icons.ts               SVG icon strings + icon() helper
   components/TabBar.svelte   Fixed bottom nav
@@ -37,6 +38,7 @@ src/
   components/Battle.svelte
   components/Morale.svelte
   components/economy/        RoundStart, Production, Territories, etc.
+  components/battle/         BattleNav, BattleMain, Raids
   components/shared/         Counter
   styles/app.css             Tailwind v4 + @theme tokens + icon sizing
 assets/icons/                Nation flags, unit silhouettes, resource/marker/UI SVGs
@@ -59,31 +61,9 @@ Economy tab with 3 sub-tabs: Round Start (income collection from territories, oi
 
 ---
 
-## Phase 3: Battle Tab
+## Phase 3: Battle Tab ✅
 
-Loss recording for Phase 4 (Combat).
-
-### Unit Losses
-- Select nation, pick destroyed unit types from list
-- Auto-calculate casualty points per battle
-- Cumulative casualty tracking per nation per round
-
-### Unit Repairs
-- Track damaged units after battle
-- Spend 1 resource each to repair (any resource type)
-- Port Advantage: free repair when friendly port + friendly naval units present
-  - Blocked by Yellow zone or worse, or bomb token on port
-
-### Territory Exchanges
-- Record territory gains/losses per nation
-- Track SV (stress value) of lost territories → feeds morale stress
-- Medal awards: +1 per territory captured, +3 per capital
-
-### Bombardment & Raids
-- Record resource losses from strategic bombing and convoy raids
-- Deduct from nation's resource stock
-
-**Deliverable**: Complete battle aftermath tracking — losses, repairs, territory, raids.
+Battle tab with 2 sub-tabs: Battle (territory-centric combat recording with 5-step workflow: location, losses, territory outcome, repairs, apply) and Raids (strategic bombing + convoy raid resource deduction). Casualty points auto-computed from unit losses. Territory captures award medals (1 normal, 3 capital, 0 neutral) and apply SV stress to former owner. Neutral invasion adds +1 stress to attacker. CasualtyPoints reset to 0 at round start.
 
 ---
 
@@ -209,7 +189,7 @@ Visual refinement pass.
 |-------|--------|-------|
 | 1. Foundation | ✅ Done | commit f3e7e32 |
 | 2. Economy Tab | ✅ Done | commit de62861 |
-| 3. Battle Tab | **Up next** | |
+| 3. Battle Tab | ✅ Done | |
 | 4. Morale Tab | Not started | |
 | 5. Dashboard Tab | Ongoing | Enhanced alongside other phases |
 | 6. Polish & Theming | Ongoing | Dark theme, icons, PWA done |

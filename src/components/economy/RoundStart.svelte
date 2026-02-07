@@ -27,6 +27,7 @@
     const game = structuredClone($state.snapshot(appState.game))
     const isRedZone = (id: NationId) => game.nations[id].zone === 'Red' || game.nations[id].zone === 'Gray'
     for (const id of NATION_IDS) {
+      game.nations[id].casualtyPoints = 0
       if (isRedZone(id)) continue
       const inc = totalIncome(id, game)
       game.nations[id].oil += inc.oil
