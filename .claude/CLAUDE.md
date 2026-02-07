@@ -40,7 +40,7 @@ references/                  Rules PDFs + parsed markdown refs
 - Always use context7 MCP for technical documentation lookups
 
 ## Key refs
-- `PLAN.md` — development roadmap & progress tracker
+- `ARCHITECTURE.md` — codebase structure & design decisions
 - `references/game-overview.md` — condensed mechanics
 - `references/game-data.md` — nations, unit costs, zones, thresholds
 - `references/complete_rules.md` — full rules (parsed from PDF)

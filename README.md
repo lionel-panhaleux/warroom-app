@@ -38,7 +38,7 @@ On mobile, use "Add to Home Screen" from the browser menu. The app works fully o
 
 ## Development
 
-See [`PLAN.md`](PLAN.md) for the development roadmap and progress tracker.
+See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the codebase structure and design decisions.
 
 ## Scope
 
