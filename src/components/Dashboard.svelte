@@ -1,13 +1,15 @@
 <script lang="ts">
-  import { appState, resetGame } from '../lib/state.svelte'
+  import { appState, setState, resetGame } from '../lib/state.svelte'
   import { NATIONS, ALLIED_IDS, AXIS_IDS, HOMELAND_ZONES, ZONE_INFO } from '../lib/data'
   import { totalIncome } from '../lib/economy'
   import { icon } from '../lib/icons'
-  import type { NationId } from '../lib/types'
+  import { uiIcons } from '../lib/icons'
+  import type { NationId, HomelandZone, NationState } from '../lib/types'
   import Territories from './economy/Territories.svelte'
 
   let showResetModal = $state(false)
   let showTerritories = $state(false)
+  let fixMode = $state(false)
 
   function zoneIndex(nationId: NationId): number {
     return HOMELAND_ZONES.indexOf(appState.game.nations[nationId].zone)
@@ -21,12 +23,33 @@
     resetGame()
     showResetModal = false
   }
+
+  function fixNation(id: NationId, field: keyof NationState, value: number | HomelandZone) {
+    const game = structuredClone($state.snapshot(appState.game))
+    ;(game.nations[id] as any)[field] = value
+    setState(game)
+  }
+
+  function fixDelta(id: NationId, field: keyof NationState, delta: number, min: number, max: number) {
+    const cur = appState.game.nations[id][field] as number
+    const next = Math.max(min, Math.min(max, cur + delta))
+    if (next !== cur) fixNation(id, field, next)
+  }
 </script>
 
 <div>
   <div class="flex items-center justify-between mb-4">
     <h1 class="text-xl font-bold text-accent">War Room</h1>
-    <span class="text-text-muted text-sm">Round {appState.game.round}</span>
+    <div class="flex items-center gap-3">
+      <button
+        class="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg {fixMode ? 'bg-accent/20 text-accent font-semibold' : 'bg-bg-surface text-text-muted'}"
+        onclick={() => { fixMode = !fixMode; if (fixMode) showTerritories = true }}
+        aria-pressed={fixMode}
+      >
+        {@html icon('markers','wrench','icon-sm')} Fix State
+      </button>
+      <span class="text-text-muted text-sm">Round {appState.game.round}</span>
+    </div>
   </div>
 
   {#each [{ label: 'Allies', ids: ALLIED_IDS }, { label: 'Axis', ids: AXIS_IDS }] as group}
@@ -56,8 +79,104 @@
               {zi.name}
             </div>
           </div>
-          {#if ns.zone !== 'White'}
+          {#if ns.zone !== 'White' && !fixMode}
             <div class="text-[10px] text-text-muted mt-1 ml-5 italic">{zi.effect}</div>
+          {/if}
+
+          <!-- Fix Mode panel -->
+          {#if fixMode}
+            <div class="mt-2 pt-2 border-t border-bg-surface-alt space-y-2">
+              <!-- Resources -->
+              {#each [
+                { field: 'oil' as const, label: 'Oil', icon: 'oil' },
+                { field: 'iron' as const, label: 'Iron', icon: 'iron' },
+                { field: 'osr' as const, label: 'OSR', icon: 'osr' },
+              ] as r}
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center gap-0.5 text-xs text-text-muted w-14">
+                    {@html icon('resources', r.icon, 'icon-xs')} {r.label}
+                  </span>
+                  <button
+                    class="w-8 h-8 flex items-center justify-center rounded bg-bg-surface-alt text-text-primary active:bg-accent/30 disabled:opacity-30"
+                    disabled={ns[r.field] <= 0}
+                    onclick={() => fixDelta(id, r.field, -1, 0, 99)}
+                  >{@html uiIcons.minus}</button>
+                  <span class="w-8 text-center font-bold tabular-nums text-sm">{ns[r.field]}</span>
+                  <button
+                    class="w-8 h-8 flex items-center justify-center rounded bg-bg-surface-alt text-text-primary active:bg-accent/30 disabled:opacity-30"
+                    disabled={ns[r.field] >= 99}
+                    onclick={() => fixDelta(id, r.field, 1, 0, 99)}
+                  >{@html uiIcons.plus}</button>
+                </div>
+              {/each}
+
+              <!-- Stress -->
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-text-muted w-14">Stress</span>
+                <button
+                  class="w-8 h-8 flex items-center justify-center rounded bg-bg-surface-alt text-text-primary active:bg-accent/30 disabled:opacity-30"
+                  disabled={ns.stress <= 0}
+                  onclick={() => fixDelta(id, 'stress', -1, 0, nation.stressThreshold)}
+                >{@html uiIcons.minus}</button>
+                <span class="w-8 text-center font-bold tabular-nums text-sm">{ns.stress}</span>
+                <button
+                  class="w-8 h-8 flex items-center justify-center rounded bg-bg-surface-alt text-text-primary active:bg-accent/30 disabled:opacity-30"
+                  disabled={ns.stress >= nation.stressThreshold}
+                  onclick={() => fixDelta(id, 'stress', 1, 0, nation.stressThreshold)}
+                >{@html uiIcons.plus}</button>
+                <span class="text-[10px] text-text-muted">/ {nation.stressThreshold}</span>
+              </div>
+
+              <!-- Medals -->
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-0.5 text-xs text-text-muted w-14">
+                  {@html icon('markers', 'medal', 'icon-xs')} Medals
+                </span>
+                <button
+                  class="w-8 h-8 flex items-center justify-center rounded bg-bg-surface-alt text-text-primary active:bg-accent/30 disabled:opacity-30"
+                  disabled={ns.medals <= 0}
+                  onclick={() => fixDelta(id, 'medals', -1, 0, 99)}
+                >{@html uiIcons.minus}</button>
+                <span class="w-8 text-center font-bold tabular-nums text-sm">{ns.medals}</span>
+                <button
+                  class="w-8 h-8 flex items-center justify-center rounded bg-bg-surface-alt text-text-primary active:bg-accent/30 disabled:opacity-30"
+                  disabled={ns.medals >= 99}
+                  onclick={() => fixDelta(id, 'medals', 1, 0, 99)}
+                >{@html uiIcons.plus}</button>
+              </div>
+
+              <!-- Civilian Goods -->
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-0.5 text-xs text-text-muted w-14">
+                  {@html icon('markers', 'civilian-goods', 'icon-xs')} CG
+                </span>
+                <button
+                  class="w-8 h-8 flex items-center justify-center rounded bg-bg-surface-alt text-text-primary active:bg-accent/30 disabled:opacity-30"
+                  disabled={ns.civilianGoods <= 0}
+                  onclick={() => fixDelta(id, 'civilianGoods', -1, 0, 99)}
+                >{@html uiIcons.minus}</button>
+                <span class="w-8 text-center font-bold tabular-nums text-sm">{ns.civilianGoods}</span>
+                <button
+                  class="w-8 h-8 flex items-center justify-center rounded bg-bg-surface-alt text-text-primary active:bg-accent/30 disabled:opacity-30"
+                  disabled={ns.civilianGoods >= 99}
+                  onclick={() => fixDelta(id, 'civilianGoods', 1, 0, 99)}
+                >{@html uiIcons.plus}</button>
+              </div>
+
+              <!-- Homeland Zone -->
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-text-muted w-14">Zone</span>
+                <div class="flex gap-1">
+                  {#each HOMELAND_ZONES as z}
+                    <button
+                      class="w-7 h-7 rounded text-[9px] font-bold {ns.zone === z ? 'ring-2 ring-white' : 'opacity-50'}"
+                      style="background: var(--color-zone-{z}); color: {z === 'White' || z === 'Yellow' ? '#1a1a1a' : '#fff'}"
+                      onclick={() => fixNation(id, 'zone', z)}
+                    >{z[0]}</button>
+                  {/each}
+                </div>
+              </div>
+            </div>
           {/if}
         </div>
       {/each}
