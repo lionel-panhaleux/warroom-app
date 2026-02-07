@@ -56,6 +56,7 @@ body {
   max-width: 480px;
   margin: 0 auto;
   padding: 0.75rem;
+  padding-top: calc(0.75rem + env(safe-area-inset-top, 0px));
 }
 
 /* Inline icon sizing */
