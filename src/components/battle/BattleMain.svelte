@@ -261,7 +261,7 @@
         <h2 class="text-sm font-semibold text-text-muted uppercase tracking-wide">3. Territory Outcome</h2>
 
         <div class="flex gap-1.5">
-          {#each [['changes-hands', 'Changes Hands'], ['embattled', 'Stays Embattled'], ['no-change', 'No Change']] as [val, label]}
+          {#each [['changes-hands', 'Changes Hands'], ['embattled', 'Stays Embattled'], ['no-change', 'Attacker Withdrew']] as [val, label]}
             <button
               class="flex-1 text-xs py-2.5 rounded-lg transition-colors
                      {outcome === val ? 'bg-accent text-bg-primary' : 'bg-bg-surface-alt text-text-muted'}"
@@ -276,9 +276,11 @@
               <span class="text-xs text-text-muted">New Owner</span>
               <div class="flex gap-1.5 mt-1 flex-wrap">
                 {#each NATION_IDS as id}
+                  {@const isCurrent = locationState?.owner === id}
                   <button
                     class="px-2 py-1 rounded-md text-xs flex items-center gap-1 transition-colors
-                           {newOwner === id ? 'bg-accent/20 ring-1 ring-accent' : 'bg-bg-surface-alt'}"
+                           {newOwner === id ? 'bg-accent/20 ring-1 ring-accent' : isCurrent ? 'bg-bg-surface-alt opacity-30' : 'bg-bg-surface-alt'}"
+                    disabled={isCurrent}
                     onclick={() => { newOwner = id; if (!medalRecipient) medalRecipient = id }}
                   >
                     {@html icon('nations', id, 'icon-xs')}
