@@ -10,26 +10,33 @@ PWA assistant for War Room board game (Larry Harris, 2nd Ed). Single shared devi
 4. Battle loss recording (feeds morale)
 
 ## Stack
-Vanilla JS, no build step, no deps. Single index.html, service worker, localStorage. Mobile-first CSS.
+Svelte 5 + Vite + TypeScript + Tailwind CSS v4 + vite-plugin-pwa. No SvelteKit.
 
 ## Structure
 ```
-index.html / manifest.json / sw.js
-css/style.css
-js/app.js          init + tab routing
-js/state.js        localStorage, getState/setState, undo
-js/data.js         static game data (nations, costs, thresholds, zones)
-js/ui.js           shared UI helpers
-js/phases/         tab modules (dashboard, economy, battle, morale)
-references/        rules PDFs + parsed markdown refs
+vite.config.ts               Svelte + Tailwind v4 + PWA plugins
+src/
+  main.ts                    Svelte 5 mount
+  App.svelte                 Tab routing + auto-persist
+  lib/types.ts               All TypeScript interfaces
+  lib/data.ts                Static game data (nations, units, brackets)
+  lib/state.svelte.ts        Reactive state ($state), localStorage, undo
+  components/TabBar.svelte   Fixed bottom nav
+  components/Dashboard.svelte
+  components/Economy.svelte
+  components/Battle.svelte
+  components/Morale.svelte
+  styles/app.css             Tailwind v4 + theme tokens
+public/icons/                PWA icons
+references/                  Rules PDFs + parsed markdown refs
 ```
 
 ## Conventions
-- `data-` attributes for DOM binding, no virtual DOM
-- CSS custom properties for nation colors
-- Central `setState()`/`getState()` pattern
+- Svelte 5 runes ($state, $derived, $effect, $props, $bindable)
+- Only `.svelte.ts` files use runes; pure data uses `.ts`
+- Tailwind v4 `@theme` block for custom properties (no tailwind.config.js)
+- Central `setState()`/`persist()` pattern with undo stack
 - Small pure functions, comments only where non-obvious
-- No external deps, test on mobile Safari + Chrome
 - Always use context7 MCP for technical documentation lookups
 
 ## Key refs
