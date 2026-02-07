@@ -23,7 +23,7 @@ function defaultTerritoryStates(): Record<string, TerritoryState> {
 function defaultGameState(): GameState {
   const nations = {} as Record<NationId, NationState>
   for (const id of NATION_IDS) nations[id] = defaultNationState()
-  return { round: 1, roundPhase: 'income' as const, nations, territories: defaultTerritoryStates() }
+  return { round: 0, roundPhase: 'income' as const, nations, territories: defaultTerritoryStates() }
 }
 
 function migrateState(game: GameState): GameState {

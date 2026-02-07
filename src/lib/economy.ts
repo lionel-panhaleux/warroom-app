@@ -28,13 +28,33 @@ export function totalIncome(nationId: NationId, game: GameState): ResourceBundle
 /** Oil bid entry per nation */
 export interface OilBid { nationId: NationId; amount: number }
 
-/** Compute turn order from bids: descending by amount, flag ties */
+/** Fisher-Yates shuffle (in-place) */
+function shuffle<T>(arr: T[]): T[] {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]]
+  }
+  return arr
+}
+
+/** Compute turn order from bids: descending by amount, ties shuffled randomly */
 export function computeTurnOrder(bids: OilBid[]): { nationId: NationId; amount: number; tied: boolean }[] {
-  const sorted = [...bids].sort((a, b) => b.amount - a.amount)
-  return sorted.map((b, i) => ({
-    ...b,
-    tied: sorted.some((o, j) => j !== i && o.amount === b.amount),
-  }))
+  // Group by amount, shuffle within groups, then flatten
+  const groups = new Map<number, OilBid[]>()
+  for (const b of bids) {
+    const g = groups.get(b.amount) ?? []
+    g.push(b)
+    groups.set(b.amount, g)
+  }
+  const amounts = [...groups.keys()].sort((a, b) => b - a)
+  const result: { nationId: NationId; amount: number; tied: boolean }[] = []
+  for (const amt of amounts) {
+    const g = groups.get(amt)!
+    const isTied = g.length > 1
+    shuffle(g)
+    for (const b of g) result.push({ ...b, tied: isTied })
+  }
+  return result
 }
 
 /** Check all bids are non-negative and within oil stock */
@@ -97,7 +117,7 @@ export function canAfford(resources: ResourceBundle): boolean {
 export function emptyProductionOrders(): NationProductionOrders {
   const unitOrders: Record<number, number> = {}
   for (let i = 0; i < UNITS.length; i++) unitOrders[i] = 0
-  return { unitOrders, tradeReceive: null, tradeGive: null, civilianGoods: 0, civGoodsPay: { oil: 0, iron: 0, osr: 0 }, bombRepair: false }
+  return { unitOrders, tradeReceive: null, tradeGive: null, civilianGoods: 0, civGoodsPay: { oil: 0, iron: 0, osr: 0 }, bombRepair: 0, unrestPay: { oil: 0, iron: 0, osr: 0 } }
 }
 
 /** Empty orders for all 7 nations */
@@ -109,7 +129,9 @@ export function initAllOrders(): Record<NationId, NationProductionOrders> {
 export function hasOrders(o: NationProductionOrders): boolean {
   if (o.tradeReceive || o.tradeGive) return true
   if (o.civilianGoods > 0) return true
-  if (o.bombRepair) return true
+  if (o.bombRepair > 0) return true
+  const unrestTotal = o.unrestPay.oil + o.unrestPay.iron + o.unrestPay.osr
+  if (unrestTotal > 0) return true
   return Object.values(o.unitOrders).some(q => q > 0)
 }
 
@@ -135,7 +157,10 @@ export function computeNationSpent(orders: NationProductionOrders): ResourceBund
   oil += orders.civGoodsPay.oil
   iron += orders.civGoodsPay.iron
   osr += orders.civGoodsPay.osr
-  if (orders.bombRepair) iron += 9
+  if (orders.bombRepair > 0) iron += orders.bombRepair * 9
+  oil += orders.unrestPay.oil
+  iron += orders.unrestPay.iron
+  osr += orders.unrestPay.osr
 
   return { oil, iron, osr }
 }
@@ -169,7 +194,12 @@ export function applyNationProduction(ns: NationState, orders: NationProductionO
   }
 
   // Bomb repair
-  if (orders.bombRepair) out.iron -= 9
+  if (orders.bombRepair > 0) out.iron -= orders.bombRepair * 9
+
+  // Unrest payment (Blue zone)
+  out.oil -= orders.unrestPay.oil
+  out.iron -= orders.unrestPay.iron
+  out.osr -= orders.unrestPay.osr
 
   return out
 }
@@ -192,6 +222,9 @@ export function validateAllProduction(
       const civAssigned = orders.civGoodsPay.oil + orders.civGoodsPay.iron + orders.civGoodsPay.osr
       if (civAssigned !== civTotal) return `${id}: civilian goods cost not fully assigned`
     }
+    // Check unrest payment totals 3 if used
+    const unrestTotal = orders.unrestPay.oil + orders.unrestPay.iron + orders.unrestPay.osr
+    if (unrestTotal > 0 && unrestTotal !== 3) return `${id}: unrest payment must total 3`
   }
   return null
 }

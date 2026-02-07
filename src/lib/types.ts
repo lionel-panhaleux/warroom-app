@@ -14,7 +14,8 @@ export interface NationProductionOrders {
   tradeGive: ResourceType | null
   civilianGoods: number
   civGoodsPay: { oil: number; iron: number; osr: number }
-  bombRepair: boolean
+  bombRepair: number
+  unrestPay: { oil: number; iron: number; osr: number }
 }
 
 export interface NationDef {

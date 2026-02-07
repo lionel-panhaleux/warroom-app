@@ -55,6 +55,7 @@
     bind:civilianGoods={allOrders[selectedNation].civilianGoods}
     bind:civGoodsPay={allOrders[selectedNation].civGoodsPay}
     bind:bombRepair={allOrders[selectedNation].bombRepair}
+    bind:unrestPay={allOrders[selectedNation].unrestPay}
     nationId={selectedNation}
     {onDone}
     {allValid}

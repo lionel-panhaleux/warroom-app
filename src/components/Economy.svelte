@@ -13,6 +13,8 @@
 
   // Transient production orders for all nations (not persisted)
   let allOrders: Record<NationId, NationProductionOrders> = $state(initAllOrders())
+  // Snapshot of last round's orders for summary display
+  let lastRoundOrders: Record<NationId, NationProductionOrders> | null = $state(null)
 
   // Auto-switch tab when phase changes
   let prevPhase = $state(appState.game.roundPhase)
@@ -20,7 +22,6 @@
     const phase = appState.game.roundPhase
     if (phase !== prevPhase) {
       if (phase === 'income' || phase === 'bidding') economyTab = 'round'
-      else if (phase === 'production') economyTab = 'production'
       prevPhase = phase
     }
   })
@@ -42,6 +43,7 @@
     }
     game.roundPhase = 'income'
     setState(game)
+    lastRoundOrders = structuredClone($state.snapshot(allOrders))
     allOrders = initAllOrders()
   }
 </script>
@@ -50,7 +52,7 @@
   <EconomyNav bind:activeTab={economyTab} roundPhase={appState.game.roundPhase} />
 
   {#if economyTab === 'round'}
-    <RoundStart />
+    <RoundStart {lastRoundOrders} />
   {:else if economyTab === 'production'}
     <Production bind:allOrders {orderIndicators} onDone={onProductionDone} />
   {:else if economyTab === 'territories'}
