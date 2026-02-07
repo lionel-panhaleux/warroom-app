@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- Green circle badge -->
+  <circle cx="24" cy="24" r="20" fill="#3A8F3A"/>
+  <!-- Dark fighter plane silhouette (top-down) -->
+  <path fill="#1A1A1A" d="M23 8h2l1 9 10 4.5v2.5l-10-1.5v8l4.5 2.5v2l-6.5-2-6.5 2v-2l4.5-2.5v-8L12 24v-2.5L22 17z"/>
+</svg>

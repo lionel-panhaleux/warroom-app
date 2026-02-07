@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <defs>
+    <clipPath id="c-usa">
+      <circle cx="24" cy="24" r="23"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#c-usa)">
+    <!-- Red background for stripes -->
+    <rect width="48" height="48" fill="#B22234"/>
+    <!-- White stripes (7 red + 6 white = 13 stripes, each ~3.7px) -->
+    <rect y="3.7" width="48" height="3.7" fill="#FFFFFF"/>
+    <rect y="11.1" width="48" height="3.7" fill="#FFFFFF"/>
+    <rect y="18.5" width="48" height="3.7" fill="#FFFFFF"/>
+    <rect y="25.8" width="48" height="3.7" fill="#FFFFFF"/>
+    <rect y="33.2" width="48" height="3.7" fill="#FFFFFF"/>
+    <rect y="40.6" width="48" height="3.7" fill="#FFFFFF"/>
+    <!-- Blue canton -->
+    <rect width="21" height="22.2" fill="#3C3B6E"/>
+    <!-- Stars (simplified — 5 stars) -->
+    <polygon points="5,4.5 5.8,6.8 8.2,6.8 6.2,8.2 7,10.5 5,9 3,10.5 3.8,8.2 1.8,6.8 4.2,6.8" fill="#FFFFFF"/>
+    <polygon points="14,4.5 14.8,6.8 17.2,6.8 15.2,8.2 16,10.5 14,9 12,10.5 12.8,8.2 10.8,6.8 13.2,6.8" fill="#FFFFFF"/>
+    <polygon points="9.5,10.5 10.3,12.8 12.7,12.8 10.7,14.2 11.5,16.5 9.5,15 7.5,16.5 8.3,14.2 6.3,12.8 8.7,12.8" fill="#FFFFFF"/>
+    <polygon points="5,16.5 5.8,18.8 8.2,18.8 6.2,20.2 7,22.5 5,21 3,22.5 3.8,20.2 1.8,18.8 4.2,18.8" fill="#FFFFFF"/>
+    <polygon points="14,16.5 14.8,18.8 17.2,18.8 15.2,20.2 16,22.5 14,21 12,22.5 12.8,20.2 10.8,18.8 13.2,18.8" fill="#FFFFFF"/>
+  </g>
+  <circle cx="24" cy="24" r="23" fill="none" stroke="#000" stroke-opacity="0.2" stroke-width="0.5"/>
+</svg>

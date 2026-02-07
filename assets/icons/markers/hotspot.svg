@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <defs>
+    <radialGradient id="g-hotspot" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFD700"/>
+      <stop offset="60%" stop-color="#FF8C00"/>
+      <stop offset="100%" stop-color="#CC2200"/>
+    </radialGradient>
+  </defs>
+  <path fill="url(#g-hotspot)" d="M24 2l4.5 10.2L39.3 8.7l-3.5 10.8L48 24l-12.2 4.5 3.5 10.8-10.8-3.5L24 48l-4.5-12.2L8.7 39.3l3.5-10.8L0 24l12.2-4.5L8.7 8.7l10.8 3.5z"/>
+</svg>

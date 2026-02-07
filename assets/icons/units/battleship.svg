@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- Red elongated hexagon badge (naval) -->
+  <polygon points="5,24 14,10 34,10 43,24 34,38 14,38" fill="#CC3333"/>
+  <!-- Smaller battleship silhouette -->
+  <path fill="#1A1A1A" d="M11 29l3-3h20l3 3c-.5 2.5-2 4-5 4H16c-3 0-4.5-1.5-5-4z"/>
+  <rect fill="#1A1A1A" x="15" y="24.5" width="18" height="2" rx="0.5"/>
+  <rect fill="#1A1A1A" x="21" y="20" width="6" height="4.5" rx="0.5"/>
+  <rect fill="#1A1A1A" x="15" y="23" width="4" height="2" rx="0.5"/>
+  <rect fill="#1A1A1A" x="12.5" y="23.5" width="3.5" height="1"/>
+  <rect fill="#1A1A1A" x="29" y="23" width="4" height="2" rx="0.5"/>
+  <rect fill="#1A1A1A" x="32" y="23.5" width="3.5" height="1"/>
+  <rect fill="#1A1A1A" x="23" y="16" width="2" height="4" rx="0.5"/>
+  <rect fill="#1A1A1A" x="23.5" y="13.5" width="1" height="2.5"/>
+</svg>

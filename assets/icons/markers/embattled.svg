@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <defs>
+    <clipPath id="c-embattled">
+      <polygon points="24,2 44,13 44,35 24,46 4,35 4,13"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#c-embattled)">
+    <!-- Red left half -->
+    <polygon points="0,0 24,0 27,8 21,16 27,24 21,32 27,40 21,48 0,48" fill="#CC3333"/>
+    <!-- Blue right half -->
+    <polygon points="48,0 24,0 27,8 21,16 27,24 21,32 27,40 21,48 48,48" fill="#3A7BBF"/>
+    <!-- White zigzag line -->
+    <polyline points="24,0 27,8 21,16 27,24 21,32 27,40 21,48" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linejoin="round"/>
+  </g>
+  <polygon points="24,2 44,13 44,35 24,46 4,35 4,13" fill="none" stroke="#1A1A1A" stroke-width="1.5"/>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- Yellow elongated hexagon badge (naval) -->
+  <polygon points="5,24 14,10 34,10 43,24 34,38 14,38" fill="#E8B830"/>
+  <!-- Smaller submarine silhouette -->
+  <path fill="#1A1A1A" d="M13 25c0-2.5 2.5-5 7-5h8c4.5 0 7 2.5 7 5s-2.5 5-7 5h-8c-4.5 0-7-2.5-7-5z"/>
+  <rect fill="#1A1A1A" x="23" y="17" width="2" height="3.5"/>
+  <rect fill="#1A1A1A" x="24" y="15" width="5" height="2" rx="0.5"/>
+</svg>

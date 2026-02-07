@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- Blue elongated hexagon badge (naval) -->
+  <polygon points="5,24 14,10 34,10 43,24 34,38 14,38" fill="#3A7BBF"/>
+  <!-- Smaller cruiser silhouette -->
+  <path fill="#1A1A1A" d="M12 28l2.5-2.5h19l2.5 2.5c-.5 2-2 3.5-4.5 3.5H16.5c-2.5 0-4-1.5-4.5-3.5z"/>
+  <rect fill="#1A1A1A" x="16" y="24" width="16" height="2" rx="0.5"/>
+  <rect fill="#1A1A1A" x="20" y="20.5" width="8" height="3.5" rx="0.5"/>
+  <rect fill="#1A1A1A" x="15" y="23" width="4" height="1.5" rx="0.5"/>
+  <rect fill="#1A1A1A" x="29" y="23" width="4" height="1.5" rx="0.5"/>
+  <rect fill="#1A1A1A" x="23" y="16.5" width="2" height="4"/>
+</svg>

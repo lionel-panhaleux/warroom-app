@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <defs>
+    <clipPath id="c-japan">
+      <circle cx="24" cy="24" r="23"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#c-japan)">
+    <rect width="48" height="48" fill="#FFFFFF"/>
+    <!-- 8 red rays of the rising sun (22.5deg wide, 45deg apart) -->
+    <g fill="#BC002D">
+      <polygon points="24,24 57.3,30.6 57.3,17.4"/>
+      <polygon points="24,24 52.3,5.1 42.9,-4.3"/>
+      <polygon points="24,24 30.6,-9.3 17.4,-9.3"/>
+      <polygon points="24,24 5.1,-4.3 -4.3,5.1"/>
+      <polygon points="24,24 -9.3,17.4 -9.3,30.6"/>
+      <polygon points="24,24 -4.3,42.9 5.1,52.3"/>
+      <polygon points="24,24 17.4,57.3 30.6,57.3"/>
+      <polygon points="24,24 42.9,52.3 52.3,42.9"/>
+    </g>
+    <!-- Central sun disc -->
+    <circle cx="24" cy="24" r="7" fill="#BC002D"/>
+  </g>
+  <circle cx="24" cy="24" r="23" fill="none" stroke="#000" stroke-opacity="0.2" stroke-width="0.5"/>
+</svg>
