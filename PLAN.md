@@ -4,83 +4,58 @@
 
 ## Architecture Summary
 
-- **Stack**: Vanilla JS, no build step, no deps, single `index.html`
+- **Stack**: Svelte 5 + Vite + TypeScript + Tailwind CSS v4 + vite-plugin-pwa
 - **Storage**: localStorage + undo stack (current state only)
 - **Navigation**: Bottom tab bar (4 tabs)
-- **UI approach**: Functional first, theming added later
+- **UI**: Dark theme, mobile-first, touch-friendly, nation/resource/zone color tokens
 - **Scope**: Single active game, Global War scenario (7 nations)
 
 ### Tabs
 
 | Tab | Purpose | Game Phases |
 |-----|---------|-------------|
-| **Dashboard** | Round overview, per-nation status summary | — |
-| **Economy** | Resource income + unit production + trade | Phase 1 & 7 |
+| **Dashboard** | Round overview, per-nation status (resources, medals, civilian goods, zone) | — |
+| **Economy** | Resource income, oil bidding, unit production, trade | Phase 1 & 7 |
 | **Battle** | Unit losses, repairs, territory exchanges, raids | Phase 4 |
 | **Morale** | Stress track, zone management, medals | Phase 6 |
 
 ### File Structure
 
 ```
-index.html / manifest.json / sw.js
-css/style.css
-js/app.js          → init + tab routing
-js/state.js        → localStorage, getState/setState, undo
-js/data.js         → nations, unit costs, thresholds, zones
-js/ui.js           → shared UI helpers (render nation selectors, etc.)
-js/phases/         → tab-specific modules
-  dashboard.js
-  economy.js
-  battle.js
-  morale.js
+src/
+  main.ts                    Svelte 5 mount
+  App.svelte                 Tab routing + auto-persist
+  lib/types.ts               All TypeScript interfaces
+  lib/data.ts                Static game data (nations, units, brackets, zones)
+  lib/territories.ts         131 territory definitions
+  lib/economy.ts             Income, trade, production helpers
+  lib/state.svelte.ts        Reactive state ($state), localStorage, undo
+  lib/icons.ts               SVG icon strings + icon() helper
+  components/TabBar.svelte   Fixed bottom nav
+  components/Dashboard.svelte
+  components/Economy.svelte
+  components/Battle.svelte
+  components/Morale.svelte
+  components/economy/        RoundStart, Production, Territories, etc.
+  components/shared/         Counter
+  styles/app.css             Tailwind v4 + @theme tokens + icon sizing
+assets/icons/                Nation flags, unit silhouettes, resource/marker/UI SVGs
+assets/favicon/              PWA icon sources
+public/icons/                PWA icons (192, 512)
+references/                  Rules PDFs + parsed markdown refs
 ```
 
 ---
 
-## Phase 1: Foundation
+## Phase 1: Foundation ✅
 
-Scaffold the app shell — no game logic yet, just the skeleton.
-
-- `index.html` with tab bar and content areas
-- `manifest.json` + `sw.js` for PWA (installable, offline)
-- `css/style.css` — minimal functional styles, mobile-first layout
-- `js/app.js` — init, tab switching
-- `js/state.js` — localStorage CRUD, `getState()`/`setState()`, undo stack
-- `js/data.js` — static game data:
-  - 7 nations (name, alliance, special rules, order limit)
-  - Unit types (costs, casualty points)
-  - Stress thresholds: China 4, Italy 4, USA 5, UK 6, USSR 6, Germany 6, Japan 7
-  - Casualty→stress conversion chart
-  - Homeland zones & penalties
-
-**Deliverable**: Installable PWA with 4 empty tabs and working state persistence.
+Svelte 5 + Vite + TS + Tailwind v4 + PWA scaffold. 4-tab shell, reactive state with localStorage + undo, all static game data typed, dark theme with nation/resource/zone color tokens, game asset SVGs (nation flags, unit silhouettes, resource/marker/UI icons), PWA icons.
 
 ---
 
-## Phase 2: Economy Tab
+## Phase 2: Economy Tab ✅
 
-Resource tracking for Phase 1 (income) and Phase 7 (production).
-
-### Phase 1: Income
-- Per-nation resource display (Oil / Iron / OSR current stock)
-- Add income: input resource gains from territory cards
-- Embattled territory flag (reduced income — player enters actual values from card back)
-- China restriction: no Oil income
-
-### Phase 2: Oil Bidding
-- Record oil bid per nation (deducted from stock)
-- China always bids 0
-- Display resulting turn order (descending bid)
-
-### Phase 7: Production
-- Unit purchase interface: pick units, auto-deduct resources
-- Resource validation (can't overspend)
-- Neutral trade: 1 trade per nation per round (Oil ×2, Iron ×3, OSR ×5)
-- Civilian goods purchase (any 5 resources total)
-- Bomb token repair: 9 Iron to remove 1 bomb token (max 1/round, optional)
-- China restrictions: no Oil, no trade
-
-**Deliverable**: Full resource lifecycle — earn, bid, trade, spend, track.
+Economy tab with 3 sub-tabs: Round Start (income collection from territories, oil bidding, turn order), Production (unit orders, trades, civilian goods, bomb repair), Territories (searchable/filterable list, owner change, embattled toggle). 131 territory definitions. Dashboard enhanced with resource/territory/medal/civilian-goods icons and zone names with effect descriptions.
 
 ---
 
@@ -232,9 +207,9 @@ Visual refinement pass.
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| 1. Foundation | Not started | |
-| 2. Economy Tab | Not started | |
-| 3. Battle Tab | Not started | |
+| 1. Foundation | ✅ Done | commit f3e7e32 |
+| 2. Economy Tab | ✅ Done | commit de62861 |
+| 3. Battle Tab | **Up next** | |
 | 4. Morale Tab | Not started | |
-| 5. Dashboard Tab | Not started | |
-| 6. Polish & Theming | Not started | |
+| 5. Dashboard Tab | Ongoing | Enhanced alongside other phases |
+| 6. Polish & Theming | Ongoing | Dark theme, icons, PWA done |
