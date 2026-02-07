@@ -30,7 +30,7 @@
       disabled={locked}
       onclick={() => activeTab = tab.id}
     >
-      <span class="mb-0.5 [&>svg]:w-5 [&>svg]:h-5">{@html tab.svg}{#if locked}<svg class="inline w-2.5 h-2.5 ml-0.5 opacity-50" viewBox="0 0 16 16" fill="currentColor"><path d="M11 7V5a3 3 0 0 0-6 0v2H4v7h8V7h-1ZM6 5a2 2 0 1 1 4 0v2H6V5Z"/></svg>{/if}</span>
+      <span class="mb-0.5 [&>svg]:w-5 [&>svg]:h-5">{@html tab.svg}</span>
       {tab.label}
     </button>
   {/each}
