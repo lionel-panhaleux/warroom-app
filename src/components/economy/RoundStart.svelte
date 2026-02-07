@@ -1,14 +1,10 @@
 <script lang="ts">
   import { appState, setState } from '../../lib/state.svelte'
-  import { NATION_IDS, NATIONS, UNITS, RESOURCES } from '../../lib/data'
-  import { totalIncome, computeTurnOrder, validateBids, hasOrders, tradeResult, type OilBid } from '../../lib/economy'
+  import { NATION_IDS, NATIONS } from '../../lib/data'
+  import { totalIncome, computeTurnOrder, validateBids, type OilBid } from '../../lib/economy'
   import { icon } from '../../lib/icons'
-  import type { NationId, NationProductionOrders } from '../../lib/types'
+  import type { NationId } from '../../lib/types'
   import Counter from '../shared/Counter.svelte'
-
-  let { lastRoundOrders }: {
-    lastRoundOrders: Record<NationId, NationProductionOrders> | null
-  } = $props()
 
   let phase = $derived(appState.game.roundPhase)
 
@@ -49,53 +45,15 @@
     for (const b of bidList) {
       game.nations[b.nationId].oil -= b.amount
     }
-    game.roundPhase = 'production'
+    game.roundPhase = 'morale'
     setState(game)
     turnOrder = computeTurnOrder(bidList)
     bids = Object.fromEntries(NATION_IDS.map(id => [id, 0])) as Record<NationId, number>
   }
 
-  /** Build a compact summary line for one nation's orders */
-  function orderSummary(o: NationProductionOrders): string {
-    const parts: string[] = []
-    const units = Object.entries(o.unitOrders)
-      .filter(([, qty]) => qty > 0)
-      .map(([i, qty]) => `${qty}× ${UNITS[Number(i)].name}`)
-    if (units.length) parts.push(units.join(', '))
-    if (o.tradeReceive && o.tradeGive && o.tradeReceive !== o.tradeGive) {
-      const tr = tradeResult(o.tradeReceive, o.tradeGive)
-      parts.push(`Trade: +${tr.receiveAmt} ${RESOURCES[o.tradeReceive].label}, -${tr.giveAmt} ${RESOURCES[o.tradeGive].label}`)
-    }
-    if (o.civilianGoods > 0) parts.push(`${o.civilianGoods} Civ. Goods`)
-    if (o.bombRepair > 0) parts.push(`${o.bombRepair} Bomb Repair`)
-    const unrest = o.unrestPay.oil + o.unrestPay.iron + o.unrestPay.osr
-    if (unrest > 0) parts.push('Unrest paid')
-    return parts.join(' · ')
-  }
 </script>
 
 <div class="space-y-4">
-  <!-- Last round production summary -->
-  {#if lastRoundOrders && phase === 'income'}
-    {@const ordered = NATION_IDS.filter(id => hasOrders(lastRoundOrders[id]))}
-    {#if ordered.length > 0}
-      <section>
-        <h2 class="text-sm font-semibold text-text-muted uppercase tracking-wide mb-2">
-          Last Round Production
-        </h2>
-        <div class="bg-bg-surface rounded-lg p-3 space-y-1.5">
-          {#each ordered as id}
-            <div class="flex items-start gap-1.5 text-xs">
-              {@html icon('nations', id, 'icon-xs')}
-              <span class="font-medium min-w-[2rem]">{id}</span>
-              <span class="text-text-muted">{orderSummary(lastRoundOrders[id])}</span>
-            </div>
-          {/each}
-        </div>
-      </section>
-    {/if}
-  {/if}
-
   <!-- Income Preview -->
   <section>
     <h2 class="text-sm font-semibold text-text-muted uppercase tracking-wide mb-2">
@@ -162,7 +120,7 @@
       <p class="text-red-400 text-xs mt-2">{bidError}</p>
     {/if}
 
-    {#if phase === 'production' && turnOrder}
+    {#if (phase === 'morale' || phase === 'production') && turnOrder}
       <div class="mt-3 bg-bg-surface rounded-lg p-3">
         <h3 class="text-xs font-semibold text-accent mb-1.5">Turn Order</h3>
         <ol class="space-y-1">

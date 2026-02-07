@@ -4,8 +4,10 @@
   import { totalIncome } from '../lib/economy'
   import { icon } from '../lib/icons'
   import type { NationId } from '../lib/types'
+  import Territories from './economy/Territories.svelte'
 
   let showResetModal = $state(false)
+  let showTerritories = $state(false)
 
   function zoneIndex(nationId: NationId): number {
     return HOMELAND_ZONES.indexOf(appState.game.nations[nationId].zone)
@@ -61,6 +63,20 @@
       {/each}
     </div>
   {/each}
+
+  <!-- Territories -->
+  <div class="mt-6">
+    <button
+      class="w-full flex items-center justify-between py-2 text-sm font-semibold text-text-muted uppercase tracking-wide"
+      onclick={() => showTerritories = !showTerritories}
+    >
+      Territories
+      <span class="text-xs">{showTerritories ? '▲' : '▼'}</span>
+    </button>
+    {#if showTerritories}
+      <Territories />
+    {/if}
+  </div>
 
   <!-- New Game -->
   <div class="mt-8 mb-4">

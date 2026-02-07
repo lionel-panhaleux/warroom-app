@@ -3,7 +3,7 @@ export type Alliance = 'Allied' | 'Axis'
 export type ResourceType = 'oil' | 'iron' | 'osr'
 export type HomelandZone = 'White' | 'Blue' | 'Yellow' | 'Orange' | 'Red' | 'Gray'
 export type UnitCategory = 'Land' | 'Air' | 'Naval'
-export type RoundPhase = 'income' | 'bidding' | 'production'
+export type RoundPhase = 'income' | 'bidding' | 'morale' | 'production'
 
 export type TerritoryOwner = NationId | null
 export type IndustryType = 'Y' | 'C' | 'YC' | null
@@ -15,7 +15,6 @@ export interface NationProductionOrders {
   civilianGoods: number
   civGoodsPay: { oil: number; iron: number; osr: number }
   bombRepair: number
-  unrestPay: { oil: number; iron: number; osr: number }
 }
 
 export interface NationDef {

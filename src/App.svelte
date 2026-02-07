@@ -5,12 +5,22 @@
   import Economy from './components/Economy.svelte'
   import Battle from './components/Battle.svelte'
   import Morale from './components/Morale.svelte'
+  import Production from './components/Production.svelte'
 
-  let activeTab: 'dashboard' | 'economy' | 'battle' | 'morale' = $state('dashboard')
+  type Tab = 'dashboard' | 'economy' | 'battle' | 'morale' | 'production'
+  let activeTab: Tab = $state('dashboard')
+
+  // Locked tabs based on round phase
+  let lockedTabs = $derived.by(() => {
+    const phase = appState.game.roundPhase
+    const locked = new Set<Tab>()
+    if (phase !== 'morale' && phase !== 'production') locked.add('morale')
+    if (phase !== 'production') locked.add('production')
+    return locked
+  })
 
   // Auto-persist on any state change
   $effect(() => {
-    // Touch reactive state to track it
     JSON.stringify(appState.game)
     persist()
   })
@@ -24,6 +34,8 @@
   <Battle />
 {:else if activeTab === 'morale'}
   <Morale />
+{:else if activeTab === 'production'}
+  <Production />
 {/if}
 
-<TabBar bind:activeTab />
+<TabBar bind:activeTab {lockedTabs} />

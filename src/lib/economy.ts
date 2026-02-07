@@ -117,7 +117,7 @@ export function canAfford(resources: ResourceBundle): boolean {
 export function emptyProductionOrders(): NationProductionOrders {
   const unitOrders: Record<number, number> = {}
   for (let i = 0; i < UNITS.length; i++) unitOrders[i] = 0
-  return { unitOrders, tradeReceive: null, tradeGive: null, civilianGoods: 0, civGoodsPay: { oil: 0, iron: 0, osr: 0 }, bombRepair: 0, unrestPay: { oil: 0, iron: 0, osr: 0 } }
+  return { unitOrders, tradeReceive: null, tradeGive: null, civilianGoods: 0, civGoodsPay: { oil: 0, iron: 0, osr: 0 }, bombRepair: 0 }
 }
 
 /** Empty orders for all 7 nations */
@@ -130,8 +130,6 @@ export function hasOrders(o: NationProductionOrders): boolean {
   if (o.tradeReceive || o.tradeGive) return true
   if (o.civilianGoods > 0) return true
   if (o.bombRepair > 0) return true
-  const unrestTotal = o.unrestPay.oil + o.unrestPay.iron + o.unrestPay.osr
-  if (unrestTotal > 0) return true
   return Object.values(o.unitOrders).some(q => q > 0)
 }
 
@@ -158,9 +156,6 @@ export function computeNationSpent(orders: NationProductionOrders): ResourceBund
   iron += orders.civGoodsPay.iron
   osr += orders.civGoodsPay.osr
   if (orders.bombRepair > 0) iron += orders.bombRepair * 9
-  oil += orders.unrestPay.oil
-  iron += orders.unrestPay.iron
-  osr += orders.unrestPay.osr
 
   return { oil, iron, osr }
 }
@@ -196,11 +191,6 @@ export function applyNationProduction(ns: NationState, orders: NationProductionO
   // Bomb repair
   if (orders.bombRepair > 0) out.iron -= orders.bombRepair * 9
 
-  // Unrest payment (Blue zone)
-  out.oil -= orders.unrestPay.oil
-  out.iron -= orders.unrestPay.iron
-  out.osr -= orders.unrestPay.osr
-
   return out
 }
 
@@ -222,9 +212,6 @@ export function validateAllProduction(
       const civAssigned = orders.civGoodsPay.oil + orders.civGoodsPay.iron + orders.civGoodsPay.osr
       if (civAssigned !== civTotal) return `${id}: civilian goods cost not fully assigned`
     }
-    // Check unrest payment totals 3 if used
-    const unrestTotal = orders.unrestPay.oil + orders.unrestPay.iron + orders.unrestPay.osr
-    if (unrestTotal > 0 && unrestTotal !== 3) return `${id}: unrest payment must total 3`
   }
   return null
 }
