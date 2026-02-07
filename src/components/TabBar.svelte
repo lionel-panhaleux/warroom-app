@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { navIcons } from '../lib/icons'
+
   type Tab = 'dashboard' | 'economy' | 'battle' | 'morale' | 'production'
 
   let { activeTab = $bindable<Tab>(), lockedTabs = new Set<Tab>() }: {
@@ -6,12 +8,12 @@
     lockedTabs?: Set<Tab>
   } = $props()
 
-  const tabs: { id: Tab; label: string; icon: string }[] = [
-    { id: 'dashboard',  label: 'Dashboard',  icon: '📊' },
-    { id: 'economy',    label: 'Economy',     icon: '💰' },
-    { id: 'battle',     label: 'Battle',      icon: '⚔️' },
-    { id: 'morale',     label: 'Morale',      icon: '🏠' },
-    { id: 'production', label: 'Produce',     icon: '🏭' },
+  const tabs: { id: Tab; label: string; svg: string }[] = [
+    { id: 'dashboard',  label: 'Dashboard',  svg: navIcons.dashboard },
+    { id: 'economy',    label: 'Economy',     svg: navIcons.economy },
+    { id: 'battle',     label: 'Battle',      svg: navIcons.battle },
+    { id: 'morale',     label: 'Morale',      svg: navIcons.morale },
+    { id: 'production', label: 'Produce',     svg: navIcons.production },
   ]
 </script>
 
@@ -25,7 +27,7 @@
       disabled={locked}
       onclick={() => activeTab = tab.id}
     >
-      <span class="text-base leading-none mb-0.5">{tab.icon}{#if locked}<span class="text-[8px] ml-0.5">🔒</span>{/if}</span>
+      <span class="mb-0.5 [&>svg]:w-5 [&>svg]:h-5">{@html tab.svg}{#if locked}<span class="text-[8px] ml-0.5">🔒</span>{/if}</span>
       {tab.label}
     </button>
   {/each}
