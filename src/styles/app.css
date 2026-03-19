@@ -64,6 +64,7 @@ body {
 /* Inline icon sizing */
 .icon { display: inline-flex; align-items: center; vertical-align: middle; }
 .icon svg { width: 1.5em; height: 1.5em; }
+button > svg { width: 1.25em; height: 1.25em; }
 .icon-xs svg { width: 1em; height: 1em; }
 .icon-sm svg { width: 1.25em; height: 1.25em; }
 .icon-lg svg { width: 2em; height: 2em; }

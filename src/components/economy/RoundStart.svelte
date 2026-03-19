@@ -36,6 +36,7 @@
     }
     game.neutralInvasionsThisRound = {}
     game.turnOrder = null
+    game.battleLog = []
     game.round += 1
     game.roundPhase = 'bidding'
     setState(game)

@@ -25,7 +25,7 @@ function defaultGameState(): GameState {
   for (const id of NATION_IDS) nations[id] = defaultNationState()
   return {
     round: 0, roundPhase: 'income' as const, nations, territories: defaultTerritoryStates(),
-    neutralInvasionHistory: {}, neutralInvasionsThisRound: {}, pactBroken: false, turnOrder: null,
+    neutralInvasionHistory: {}, neutralInvasionsThisRound: {}, pactBroken: false, turnOrder: null, battleLog: [],
   }
 }
 
@@ -36,6 +36,7 @@ function migrateState(game: GameState): GameState {
   if (!game.neutralInvasionsThisRound) game.neutralInvasionsThisRound = {}
   if (game.pactBroken === undefined) game.pactBroken = false
   if (game.turnOrder === undefined) game.turnOrder = null
+  if (!game.battleLog) game.battleLog = []
   return game
 }
 

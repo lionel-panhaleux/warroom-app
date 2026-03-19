@@ -8,25 +8,8 @@
   import NationSelector from '../economy/NationSelector.svelte'
   import Counter from '../shared/Counter.svelte'
 
-  // --- U5: Battle history log ---
-  interface BattleLogEntry {
-    location: string
-    nationsInvolved: NationId[]
-    totalCP: number
-    outcome: string
-    newOwner: NationId | null
-  }
-  let battleLog: BattleLogEntry[] = $state([])
+  // --- U5: Battle history log (persisted in appState) ---
   let showLog = $state(false)
-  let currentRound = $state(appState.game.round)
-
-  // Clear log on round change
-  $effect(() => {
-    if (appState.game.round !== currentRound) {
-      battleLog = []
-      currentRound = appState.game.round
-    }
-  })
 
   // --- Step 1: Location ---
   let locationSearch = $state('')
@@ -160,12 +143,10 @@
       game.nations[id].osr = Math.max(0, game.nations[id].osr - r.osr)
     }
 
-    setState(game)
-
     // U5: Log entry
     const locName = isSeaBattle ? 'Sea Battle' : (locationDef?.name ?? location ?? '?')
     const outcomeLabel = isSeaBattle ? 'Sea' : outcome === 'changes-hands' ? `→ ${newOwner}` : outcome === 'embattled' ? 'Embattled' : 'No Change'
-    battleLog = [...battleLog, {
+    game.battleLog = [...game.battleLog, {
       location: locName,
       nationsInvolved: nationsWithLosses,
       totalCP,
@@ -173,6 +154,7 @@
       newOwner: outcome === 'changes-hands' ? newOwner : null,
     }]
 
+    setState(game)
     resetAll()
   }
 
@@ -196,15 +178,15 @@
 
 <div class="space-y-4">
   <!-- U5: Battle log -->
-  {#if battleLog.length > 0}
+  {#if appState.game.battleLog.length > 0}
     <section class="bg-bg-surface rounded-lg p-3">
       <button class="w-full flex items-center justify-between text-xs font-semibold text-accent uppercase tracking-wide" onclick={() => showLog = !showLog}>
-        Battles this round ({battleLog.length})
+        Battles this round ({appState.game.battleLog.length})
         <span>{showLog ? '\u25B2' : '\u25BC'}</span>
       </button>
       {#if showLog}
         <div class="mt-2 space-y-1">
-          {#each battleLog as entry, i}
+          {#each appState.game.battleLog as entry, i}
             <div class="flex items-center justify-between text-xs border-b border-bg-surface-alt/50 py-1 last:border-0">
               <div class="flex items-center gap-1.5">
                 <span class="text-text-muted">{i + 1}.</span>

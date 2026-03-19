@@ -73,6 +73,14 @@ export interface TurnOrderEntry {
   tied: boolean
 }
 
+export interface BattleLogEntry {
+  location: string
+  nationsInvolved: NationId[]
+  totalCP: number
+  outcome: string
+  newOwner: NationId | null
+}
+
 export interface GameState {
   round: number
   roundPhase: RoundPhase
@@ -82,6 +90,7 @@ export interface GameState {
   neutralInvasionsThisRound: Partial<Record<NationId, number>> // count per nation, reset each round
   pactBroken: boolean // Soviet-Japanese Non-Aggression Pact (one-time, permanent)
   turnOrder: TurnOrderEntry[] | null // persisted from oil bidding
+  battleLog: BattleLogEntry[] // battles this round, cleared on round advance
 }
 
 export interface AppState {
