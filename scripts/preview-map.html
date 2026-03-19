@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>War Room Map Preview</title>
+<style>
+body { background: #0a0a14; margin: 20px; display: flex; justify-content: center; }
+svg { border: 1px solid #333; }
+.sea-zone { stroke: #2a3060; stroke-width: 0.5; cursor: pointer; opacity: 0.7; }
+.sea-zone:hover { stroke: #fff; stroke-width: 1.5; opacity: 1; }
+.territory { stroke: #000; stroke-width: 0.8; cursor: pointer; }
+.territory:hover { stroke: #fff; stroke-width: 2; filter: brightness(1.3); }
+.island { stroke: #000; stroke-width: 1.2; }
+.terrain { fill: none; stroke: #ffd700; stroke-width: 2.5; stroke-dasharray: 6,3; stroke-linecap: round; }
+text { font: 5px system-ui; fill: #fff; text-anchor: middle; pointer-events: none;
+  text-shadow: 0 0 3px #000, 0 0 3px #000; }
+.sea-label { font: 4px system-ui; fill: #8899cc; }
+.ocean { fill: #1a2040; stroke: none; }
+</style>
+</head>
+<body>
+<svg id="map" viewBox="0 0 800 800" width="800" height="800"></svg>
+<script type="module">
+const resp = await fetch('./map-paths-data.json');
+const { TERRITORY_PATHS, TERRITORY_CENTERS, MAP_OUTLINE, IMPASSABLE_PATHS, SEA_ZONE_PATHS, SEA_ZONE_CENTERS } = await resp.json();
+
+const svg = document.getElementById('map');
+
+// Brighter nation colors for better visibility
+const nationColors = {
+  CHN: '#A0522D',  // sienna
+  UK:  '#DAA520',  // goldenrod
+  USSR:'#CD3333',  // red
+  USA: '#3CB371',  // medium sea green
+  GER: '#708090',  // slate gray
+  ITA: '#6B8E23',  // olive drab
+  JAP: '#E08040',  // orange
+  neutral: '#999', // light gray
+};
+
+function ownerColor(code) {
+  const map = { U: 'USA', B: 'UK', R: 'USSR', G: 'GER', T: 'ITA', J: 'JAP', C: 'CHN', N: 'neutral' };
+  return nationColors[map[code[0]] || 'neutral'] || '#999';
+}
+
+// Ocean background
+if (MAP_OUTLINE) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  el.setAttribute('d', MAP_OUTLINE);
+  el.setAttribute('class', 'ocean');
+  svg.appendChild(el);
+}
+
+// Sea zone colors by ocean
+const seaColors = {
+  A: '#1a2850', M: '#1a2850', I: '#152040', P: '#152040',
+};
+
+// Sea zones (rendered first, behind land)
+if (SEA_ZONE_PATHS) {
+  for (const [code, d] of Object.entries(SEA_ZONE_PATHS)) {
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', seaColors[code[0]] || '#1a2040');
+    path.setAttribute('class', 'sea-zone');
+    svg.appendChild(path);
+  }
+}
+
+// Territories
+for (const [code, d] of Object.entries(TERRITORY_PATHS)) {
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', d);
+  path.setAttribute('fill', ownerColor(code));
+  path.setAttribute('class', 'territory');
+  if (d.includes('m-')) path.classList.add('island');
+  svg.appendChild(path);
+}
+
+// Impassable terrain
+if (IMPASSABLE_PATHS) {
+  for (const [name, d] of Object.entries(IMPASSABLE_PATHS)) {
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('class', 'terrain');
+    svg.appendChild(path);
+  }
+}
+
+// Labels
+for (const [code, [x, y]] of Object.entries(TERRITORY_CENTERS)) {
+  const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  text.setAttribute('x', x);
+  text.setAttribute('y', y + 1.5);
+  text.textContent = code;
+  svg.appendChild(text);
+}
+
+// Sea zone labels
+if (SEA_ZONE_CENTERS) {
+  for (const [code, [x, y]] of Object.entries(SEA_ZONE_CENTERS)) {
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', x);
+    text.setAttribute('y', y + 1.5);
+    text.setAttribute('class', 'sea-label');
+    text.textContent = code;
+    svg.appendChild(text);
+  }
+}
+</script>
+</body>
+</html>

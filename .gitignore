@@ -4,3 +4,4 @@ dist
 dev-dist
 *.local
 assets/_reference/
+scripts/geodata/
