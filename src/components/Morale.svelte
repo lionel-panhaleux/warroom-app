@@ -61,8 +61,10 @@
       if (d.medalsToSpend > n.medals) return `${id}: spending more medals than available`
       if (d.cgToSpend > n.civilianGoods) return `${id}: spending more CG than available`
       const unrestTotal = d.unrestPay.oil + d.unrestPay.iron + d.unrestPay.osr
-      if (unrestTotal > 0 && unrestTotal !== 3) return `${id}: unrest payment must total 3`
-      if (d.unrestPay.oil > n.oil || d.unrestPay.iron > n.iron || d.unrestPay.osr > n.osr) return `${id}: not enough resources for unrest`
+      if (unrestTotal > 0) {
+        if (unrestTotal !== 3) return `${id}: unrest payment must total 3`
+        if (d.unrestPay.oil > n.oil || d.unrestPay.iron > n.iron || d.unrestPay.osr > n.osr) return `${id}: not enough resources for unrest`
+      }
     }
     return null
   })

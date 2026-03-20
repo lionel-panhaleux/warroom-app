@@ -74,11 +74,25 @@ export interface TurnOrderEntry {
 }
 
 export interface BattleLogEntry {
+  // Display fields
   location: string
   nationsInvolved: NationId[]
   totalCP: number
   outcome: string
   newOwner: NationId | null
+  // Full input data (for edit/reversal)
+  locationCode: string | null
+  losses: Record<NationId, Record<number, number>>
+  typedOutcome: 'changes-hands' | 'embattled' | 'no-change' | 'sea' | null
+  medalRecipient: NationId | null
+  repairs: Record<NationId, { oil: number; iron: number; osr: number }>
+  // Reversal data
+  nationCPs: Record<NationId, number>
+  medalsAwarded: number
+  svStress: number
+  prevOwner: TerritoryOwner
+  prevEmbattled: boolean
+  neutralInvasion: boolean
 }
 
 export interface GameState {

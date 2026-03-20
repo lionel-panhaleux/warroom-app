@@ -1,15 +1,19 @@
 <script lang="ts">
-  import { appState, setState } from '../../lib/state.svelte'
+  import { appState, setState, persist } from '../../lib/state.svelte'
   import { NATION_IDS, NATIONS, UNITS } from '../../lib/data'
   import { TERRITORIES, TERRITORY_MAP } from '../../lib/territories'
-  import { computeCasualtyPoints, medalCount, isNeutralInvasion, recordNeutralInvasion } from '../../lib/battle'
+  import { computeCasualtyPoints, medalCount, isNeutralInvasion, recordNeutralInvasion, reverseBattle } from '../../lib/battle'
   import { icon } from '../../lib/icons'
-  import type { NationId, TerritoryDef } from '../../lib/types'
+  import type { NationId, GameState, TerritoryDef } from '../../lib/types'
   import NationSelector from '../economy/NationSelector.svelte'
   import Counter from '../shared/Counter.svelte'
 
   // --- U5: Battle history log (persisted in appState) ---
   let showLog = $state(false)
+
+  // --- Edit mode ---
+  let editMode = $state(false)
+  let editBaseline: GameState | null = $state(null) // game state with battle reversed
 
   // --- Step 1: Location ---
   let locationSearch = $state('')
@@ -25,7 +29,9 @@
   })
 
   let locationDef = $derived(location && location !== 'sea' ? TERRITORY_MAP[location] : null)
-  let locationState = $derived(location && location !== 'sea' ? appState.game.territories[location] : null)
+  // In edit mode, show territory from baseline (pre-battle state)
+  let baseGame = $derived(editBaseline ?? appState.game)
+  let locationState = $derived(location && location !== 'sea' ? baseGame.territories[location] ?? null : null)
 
   // --- Step 2: Losses ---
   let lossNation: NationId = $state('GER')
@@ -59,22 +65,15 @@
   let svStress = $derived(locationDef?.sv ?? 0)
   let neutralInvasion = $derived(
     location !== null && location !== 'sea' && outcome === 'changes-hands' && newOwner
-      ? isNeutralInvasion(location, newOwner, appState.game.neutralInvasionHistory)
+      ? isNeutralInvasion(location, newOwner, baseGame.neutralInvasionHistory)
       : false
   )
 
   // --- Step 4: Repairs ---
-  // U12: Default to first nation with losses, fallback to first allied
   let repairNation: NationId = $state('CHN')
-  let repairNationState = $derived(appState.game.nations[repairNation])
+  // In edit mode, show baseline resources (what they have before this battle)
+  let repairNationState = $derived(baseGame.nations[repairNation])
   let repairs: Record<NationId, { oil: number; iron: number; osr: number }> = $state(initRepairs())
-
-  // U12: Auto-select repair nation when losses change
-  $effect(() => {
-    if (nationsWithLosses.length > 0 && !nationsWithLosses.includes(repairNation)) {
-      repairNation = nationsWithLosses[0]
-    }
-  })
 
   function initRepairs() {
     const out = {} as Record<NationId, { oil: number; iron: number; osr: number }>
@@ -93,16 +92,15 @@
   // --- Validation ---
   let canApply = $derived.by(() => {
     if (!location) return false
-    if (totalCP === 0 && repairTotal === 0) return false
-    if (!isSeaBattle && totalCP > 0 && !outcome) return false
+    if (!isSeaBattle && !outcome) return false
     if (outcome === 'changes-hands' && !newOwner) return false
     return true
   })
 
-  // --- Apply ---
-  function applyBattle() {
-    if (!canApply) return
-    const game = structuredClone($state.snapshot(appState.game))
+  // --- Build game state from form fields applied to a base ---
+  function buildBattleGame(base: GameState): GameState {
+    const prevTerritory = location && location !== 'sea' ? base.territories[location] ?? null : null
+    const game = structuredClone(base)
 
     // Add CP to nations
     for (const id of NATION_IDS) {
@@ -112,20 +110,13 @@
 
     // Territory outcome
     if (!isSeaBattle && outcome === 'changes-hands' && location && newOwner) {
-      const prevOwner = game.territories[location]?.owner
       game.territories[location].owner = newOwner
       game.territories[location].embattled = false
-
-      // Medals
       const recipient = medalRecipient ?? newOwner
       game.nations[recipient].medals += medalsAwarded
-
-      // SV stress to former owner
-      if (prevOwner && svStress > 0) {
-        game.nations[prevOwner].stress += svStress
+      if (prevTerritory?.owner && svStress > 0) {
+        game.nations[prevTerritory.owner].stress += svStress
       }
-
-      // Record neutral invasion (stress applied in morale phase)
       if (neutralInvasion) {
         recordNeutralInvasion(game, newOwner, location)
       }
@@ -143,18 +134,81 @@
       game.nations[id].osr = Math.max(0, game.nations[id].osr - r.osr)
     }
 
-    // U5: Log entry
+    // Log entry
     const locName = isSeaBattle ? 'Sea Battle' : (locationDef?.name ?? location ?? '?')
-    const outcomeLabel = isSeaBattle ? 'Sea' : outcome === 'changes-hands' ? `→ ${newOwner}` : outcome === 'embattled' ? 'Embattled' : 'No Change'
+    const outcomeStr = isSeaBattle ? 'Sea' : outcome === 'changes-hands' ? `→ ${newOwner}` : outcome === 'embattled' ? 'Embattled' : 'No Change'
     game.battleLog = [...game.battleLog, {
       location: locName,
-      nationsInvolved: nationsWithLosses,
+      nationsInvolved: nationsWithLosses.length > 0 ? nationsWithLosses : (newOwner ? [newOwner] : []),
       totalCP,
-      outcome: outcomeLabel,
+      outcome: outcomeStr,
       newOwner: outcome === 'changes-hands' ? newOwner : null,
+      locationCode: location,
+      losses: structuredClone($state.snapshot(losses)),
+      typedOutcome: isSeaBattle ? 'sea' : outcome,
+      medalRecipient: medalRecipient,
+      repairs: structuredClone($state.snapshot(repairs)),
+      nationCPs: structuredClone($state.snapshot(nationCPs)),
+      medalsAwarded,
+      svStress,
+      prevOwner: prevTerritory?.owner ?? null,
+      prevEmbattled: prevTerritory?.embattled ?? false,
+      neutralInvasion,
     }]
 
+    return game
+  }
+
+  // --- Apply (new battle) ---
+  function applyBattle() {
+    if (!canApply) return
+    setState(buildBattleGame($state.snapshot(appState.game) as GameState))
+    resetAll()
+  }
+
+  // --- Edit mode: auto-apply on every form change ---
+  $effect(() => {
+    if (!editMode || !editBaseline || !canApply) return
+    // Reading form fields inside buildBattleGame establishes tracking
+    const result = buildBattleGame(editBaseline)
+    appState.game = result
+    persist()
+  })
+
+  function parseOutcome(typed: string | null): Outcome | null {
+    if (typed === 'changes-hands' || typed === 'embattled' || typed === 'no-change') return typed
+    return null
+  }
+
+  function editBattle(index: number) {
+    const entry = appState.game.battleLog[index]
+    if (!entry?.locationCode) return
+
+    // Reverse battle and remove log entry — push one undo snapshot
+    const game = structuredClone($state.snapshot(appState.game))
+    reverseBattle(game, entry)
+    game.battleLog = game.battleLog.filter((_: unknown, i: number) => i !== index)
     setState(game)
+
+    // Store baseline for auto-apply
+    editBaseline = structuredClone($state.snapshot(appState.game)) as GameState
+
+    // Populate form from the entry
+    location = entry.locationCode
+    locationSearch = ''
+    losses = structuredClone(entry.losses)
+    lossNation = entry.nationsInvolved[0] ?? 'GER'
+    outcome = parseOutcome(entry.typedOutcome)
+    newOwner = entry.newOwner
+    medalRecipient = entry.medalRecipient
+    repairs = structuredClone(entry.repairs)
+    repairNation = entry.nationsInvolved[0] ?? 'CHN'
+    editMode = true
+  }
+
+  function finishEdit() {
+    editMode = false
+    editBaseline = null
     resetAll()
   }
 
@@ -198,6 +252,9 @@
                   {@html icon('nations', nid, 'icon-xs')}
                 {/each}
                 <span class="text-text-muted ml-1">{entry.outcome}</span>
+                {#if entry.locationCode}
+                  <button class="text-accent ml-1 hover:underline" onclick={() => editBattle(i)}>Edit</button>
+                {/if}
               </div>
             </div>
           {/each}
@@ -208,7 +265,9 @@
 
   <!-- Step 1: Location -->
   <section class="bg-bg-surface rounded-lg p-3 space-y-2">
-    <h2 class="text-sm font-semibold text-text-muted uppercase tracking-wide">1. Location</h2>
+    <h2 class="text-sm font-semibold text-text-muted uppercase tracking-wide">
+      {editMode ? 'Editing Battle' : '1. Location'}
+    </h2>
 
     {#if !location}
       <input
@@ -263,7 +322,9 @@
             {/if}
           </div>
         {/if}
-        <button class="text-xs text-accent ml-2" onclick={resetAll}>Change</button>
+        {#if !editMode}
+          <button class="text-xs text-accent ml-2" onclick={resetAll}>Change</button>
+        {/if}
       </div>
       {#if neutralInvasion && outcome === 'changes-hands'}
         <p class="text-[10px] text-warning">Neutral invasion: +1 stress to attacker</p>
@@ -412,12 +473,19 @@
       </div>
     </section>
 
-    <!-- Step 5: Apply -->
-    <button
-      class="w-full py-3 rounded-lg font-semibold text-sm transition-colors
-             {canApply ? 'bg-accent text-bg-primary active:bg-accent-dim' : 'bg-bg-surface-alt text-text-muted'}"
-      disabled={!canApply}
-      onclick={applyBattle}
-    >Apply Battle</button>
+    <!-- Step 5: Apply / Done -->
+    {#if editMode}
+      <button
+        class="w-full py-3 rounded-lg font-semibold text-sm bg-accent text-bg-primary active:bg-accent-dim"
+        onclick={finishEdit}
+      >Done Editing</button>
+    {:else}
+      <button
+        class="w-full py-3 rounded-lg font-semibold text-sm transition-colors
+               {canApply ? 'bg-accent text-bg-primary active:bg-accent-dim' : 'bg-bg-surface-alt text-text-muted'}"
+        disabled={!canApply}
+        onclick={applyBattle}
+      >Apply Battle</button>
+    {/if}
   {/if}
 </div>
