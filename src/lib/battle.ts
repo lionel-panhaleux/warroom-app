@@ -1,4 +1,4 @@
-import type { NationId, TerritoryState, GameState, BattleLogEntry } from './types'
+import type { NationId, TerritoryState, GameState, BattleLogEntry, RaidLogEntry } from './types'
 import { UNITS, CAPITALS, NATION_IDS } from './data'
 import { TERRITORY_MAP } from './territories'
 
@@ -83,5 +83,15 @@ export function reverseBattle(game: GameState, entry: BattleLogEntry) {
       game.nations[id].iron += r.iron
       game.nations[id].osr += r.osr
     }
+  }
+}
+
+/** Reverse all effects of a raid entry (mutates game) */
+export function reverseRaid(game: GameState, entry: RaidLogEntry) {
+  game.nations[entry.nationId].oil += entry.oil
+  game.nations[entry.nationId].iron += entry.iron
+  game.nations[entry.nationId].osr += entry.osr
+  if (entry.convoyCP > 0) {
+    game.nations[entry.nationId].casualtyPoints -= entry.convoyCP
   }
 }

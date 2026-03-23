@@ -95,6 +95,15 @@ export interface BattleLogEntry {
   neutralInvasion: boolean
 }
 
+export interface RaidLogEntry {
+  nationId: NationId
+  raidType: 'strategic' | 'convoy'
+  oil: number
+  iron: number
+  osr: number
+  convoyCP: number // 6 per resource lost in convoy raids
+}
+
 export interface GameState {
   round: number
   roundPhase: RoundPhase
@@ -105,6 +114,7 @@ export interface GameState {
   pactBroken: boolean // Soviet-Japanese Non-Aggression Pact (one-time, permanent)
   turnOrder: TurnOrderEntry[] | null // persisted from oil bidding
   battleLog: BattleLogEntry[] // battles this round, cleared on round advance
+  raidLog: RaidLogEntry[] // raids this round, cleared on round advance
 }
 
 export interface AppState {

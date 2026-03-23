@@ -1,10 +1,11 @@
 <script lang="ts">
+  import { untrack } from 'svelte'
   import { appState, setState, persist } from '../../lib/state.svelte'
   import { NATION_IDS, NATIONS, UNITS } from '../../lib/data'
   import { TERRITORIES, TERRITORY_MAP } from '../../lib/territories'
   import { computeCasualtyPoints, medalCount, isNeutralInvasion, recordNeutralInvasion, reverseBattle } from '../../lib/battle'
   import { icon } from '../../lib/icons'
-  import type { NationId, GameState, TerritoryDef } from '../../lib/types'
+  import type { NationId, GameState, BattleLogEntry } from '../../lib/types'
   import NationSelector from '../economy/NationSelector.svelte'
   import Counter from '../shared/Counter.svelte'
 
@@ -12,8 +13,11 @@
   let showLog = $state(false)
 
   // --- Edit mode ---
-  let editMode = $state(false)
-  let editBaseline: GameState | null = $state(null) // game state with battle reversed
+  let editIndex: number | null = $state(null)
+  let editEntry: BattleLogEntry | null = $state(null)
+  let preEditGame: GameState | null = $state(null)
+  let populatingForm = $state(false)
+  let editMode = $derived(editIndex !== null)
 
   // --- Step 1: Location ---
   let locationSearch = $state('')
@@ -29,9 +33,14 @@
   })
 
   let locationDef = $derived(location && location !== 'sea' ? TERRITORY_MAP[location] : null)
-  // In edit mode, show territory from baseline (pre-battle state)
-  let baseGame = $derived(editBaseline ?? appState.game)
-  let locationState = $derived(location && location !== 'sea' ? baseGame.territories[location] ?? null : null)
+  // In edit mode, show the pre-battle territory state so owner/embattled are correct
+  let locationState = $derived.by(() => {
+    if (!location || location === 'sea') return null
+    if (editEntry && editEntry.locationCode === location) {
+      return { owner: editEntry.prevOwner, embattled: editEntry.prevEmbattled }
+    }
+    return appState.game.territories[location] ?? null
+  })
 
   // --- Step 2: Losses ---
   let lossNation: NationId = $state('GER')
@@ -63,16 +72,30 @@
 
   let medalsAwarded = $derived(location && location !== 'sea' && outcome === 'changes-hands' ? medalCount(location) : 0)
   let svStress = $derived(locationDef?.sv ?? 0)
-  let neutralInvasion = $derived(
-    location !== null && location !== 'sea' && outcome === 'changes-hands' && newOwner
-      ? isNeutralInvasion(location, newOwner, baseGame.neutralInvasionHistory)
-      : false
-  )
+  // Neutral invasion check: in edit mode, exclude the current entry's contribution from history
+  let neutralInvasion = $derived.by(() => {
+    if (!location || location === 'sea' || outcome !== 'changes-hands' || !newOwner) return false
+    let history = appState.game.neutralInvasionHistory
+    if (editEntry?.neutralInvasion && editEntry.newOwner && editEntry.locationCode) {
+      history = structuredClone($state.snapshot(history))
+      const h = history[editEntry.newOwner]
+      if (h) {
+        const idx = h.lastIndexOf(editEntry.locationCode)
+        if (idx >= 0) h.splice(idx, 1)
+      }
+    }
+    return isNeutralInvasion(location, newOwner, history)
+  })
 
   // --- Step 4: Repairs ---
   let repairNation: NationId = $state('CHN')
-  // In edit mode, show baseline resources (what they have before this battle)
-  let repairNationState = $derived(baseGame.nations[repairNation])
+  // In edit mode, the nation's resources already have repairs deducted — add them back for max display
+  let repairNationAvailable = $derived.by(() => {
+    const ns = appState.game.nations[repairNation]
+    if (!editEntry) return ns
+    const r = editEntry.repairs[repairNation] ?? { oil: 0, iron: 0, osr: 0 }
+    return { ...ns, oil: ns.oil + r.oil, iron: ns.iron + r.iron, osr: ns.osr + r.osr }
+  })
   let repairs: Record<NationId, { oil: number; iron: number; osr: number }> = $state(initRepairs())
 
   function initRepairs() {
@@ -166,13 +189,28 @@
     resetAll()
   }
 
-  // --- Edit mode: auto-apply on every form change ---
+  // --- Edit mode: reverse-old, apply-new on each form change ---
   $effect(() => {
-    if (!editMode || !editBaseline || !canApply) return
-    // Reading form fields inside buildBattleGame establishes tracking
-    const result = buildBattleGame(editBaseline)
-    appState.game = result
-    persist()
+    if (editIndex === null || populatingForm || !canApply) return
+    // Track form fields (these trigger re-runs)
+    const _ = [location, outcome, newOwner, medalRecipient, $state.snapshot(losses), $state.snapshot(repairs), totalCP]
+
+    untrack(() => {
+      if (!editEntry || editIndex === null) return
+      const game = structuredClone($state.snapshot(appState.game)) as GameState
+      // Reverse the old entry
+      reverseBattle(game, editEntry!)
+      game.battleLog.splice(editIndex!, 1)
+      // Apply new from current form (appends to end)
+      const result = buildBattleGame(game)
+      // Move new entry back to original position
+      const newEntry = result.battleLog.pop()!
+      result.battleLog.splice(editIndex!, 0, newEntry)
+      // Update editEntry for next cycle
+      editEntry = structuredClone(newEntry) as BattleLogEntry
+      appState.game = result
+      persist()
+    })
   })
 
   function parseOutcome(typed: string | null): Outcome | null {
@@ -184,32 +222,51 @@
     const entry = appState.game.battleLog[index]
     if (!entry?.locationCode) return
 
-    // Reverse battle and remove log entry — push one undo snapshot
-    const game = structuredClone($state.snapshot(appState.game))
-    reverseBattle(game, entry)
-    game.battleLog = game.battleLog.filter((_: unknown, i: number) => i !== index)
-    setState(game)
+    // Store pre-edit game for undo
+    preEditGame = structuredClone($state.snapshot(appState.game)) as GameState
+    editEntry = structuredClone($state.snapshot(entry)) as BattleLogEntry
+    editIndex = index
 
-    // Store baseline for auto-apply
-    editBaseline = structuredClone($state.snapshot(appState.game)) as GameState
-
-    // Populate form from the entry
-    location = entry.locationCode
+    // Populate form from the snapshot (reactive proxies need $state.snapshot for deep clone)
+    const snap = $state.snapshot(entry)
+    populatingForm = true
+    location = snap.locationCode
     locationSearch = ''
-    losses = structuredClone(entry.losses)
-    lossNation = entry.nationsInvolved[0] ?? 'GER'
-    outcome = parseOutcome(entry.typedOutcome)
-    newOwner = entry.newOwner
-    medalRecipient = entry.medalRecipient
-    repairs = structuredClone(entry.repairs)
-    repairNation = entry.nationsInvolved[0] ?? 'CHN'
-    editMode = true
+    losses = structuredClone(snap.losses)
+    lossNation = snap.nationsInvolved[0] ?? 'GER'
+    outcome = parseOutcome(snap.typedOutcome)
+    newOwner = snap.newOwner
+    medalRecipient = snap.medalRecipient
+    repairs = structuredClone(snap.repairs)
+    repairNation = snap.nationsInvolved[0] ?? 'CHN'
+    queueMicrotask(() => populatingForm = false)
   }
 
   function finishEdit() {
-    editMode = false
-    editBaseline = null
+    if (preEditGame) {
+      appState.undoStack = [preEditGame, ...appState.undoStack].slice(0, 20)
+      persist()
+    }
+    editIndex = null
+    editEntry = null
+    preEditGame = null
+    populatingForm = false
     resetAll()
+  }
+
+  function deleteBattle(index: number) {
+    const entry = appState.game.battleLog[index]
+    if (!entry) return
+    const game = structuredClone($state.snapshot(appState.game)) as GameState
+    reverseBattle(game, entry)
+    game.battleLog.splice(index, 1)
+    setState(game)
+    if (editIndex === index) {
+      editIndex = null
+      editEntry = null
+      preEditGame = null
+      resetAll()
+    }
   }
 
   function resetAll() {
@@ -253,7 +310,12 @@
                 {/each}
                 <span class="text-text-muted ml-1">{entry.outcome}</span>
                 {#if entry.locationCode}
-                  <button class="text-accent ml-1 hover:underline" onclick={() => editBattle(i)}>Edit</button>
+                  <button class="p-1.5 rounded-md text-text-muted hover:text-accent active:bg-accent/10 transition-colors" onclick={() => editBattle(i)}>
+                    {@html icon('ui', 'edit', 'icon-xs')}
+                  </button>
+                  <button class="p-1.5 rounded-md text-text-muted hover:text-danger active:bg-danger/10 transition-colors" onclick={() => deleteBattle(i)}>
+                    {@html icon('ui', 'trash', 'icon-xs')}
+                  </button>
                 {/if}
               </div>
             </div>
@@ -450,25 +512,25 @@
           <div class="flex items-center gap-1.5">
             {@html icon('resources', 'oil', 'icon-xs')}
             <span class="text-xs">Oil</span>
-            <span class="text-[10px] text-text-muted">(has {repairNationState.oil})</span>
+            <span class="text-[10px] text-text-muted">(has {repairNationAvailable.oil})</span>
           </div>
-          <Counter bind:value={repairs[repairNation].oil} min={0} max={repairNationState.oil} />
+          <Counter bind:value={repairs[repairNation].oil} min={0} max={repairNationAvailable.oil} />
         </div>
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-1.5">
             {@html icon('resources', 'iron', 'icon-xs')}
             <span class="text-xs">Iron</span>
-            <span class="text-[10px] text-text-muted">(has {repairNationState.iron})</span>
+            <span class="text-[10px] text-text-muted">(has {repairNationAvailable.iron})</span>
           </div>
-          <Counter bind:value={repairs[repairNation].iron} min={0} max={repairNationState.iron} />
+          <Counter bind:value={repairs[repairNation].iron} min={0} max={repairNationAvailable.iron} />
         </div>
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-1.5">
             {@html icon('resources', 'osr', 'icon-xs')}
             <span class="text-xs">OSR</span>
-            <span class="text-[10px] text-text-muted">(has {repairNationState.osr})</span>
+            <span class="text-[10px] text-text-muted">(has {repairNationAvailable.osr})</span>
           </div>
-          <Counter bind:value={repairs[repairNation].osr} min={0} max={repairNationState.osr} />
+          <Counter bind:value={repairs[repairNation].osr} min={0} max={repairNationAvailable.osr} />
         </div>
       </div>
     </section>
