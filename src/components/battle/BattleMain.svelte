@@ -23,6 +23,22 @@
   let locationSearch = $state('')
   let location: string | null = $state(null) // territory code or 'sea'
   let isSeaBattle = $derived(location === 'sea')
+  let highlightIndex = $state(-1)
+
+  function onLocationKeydown(e: KeyboardEvent) {
+    if (!searchResults.length) return
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      highlightIndex = (highlightIndex + 1) % searchResults.length
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      highlightIndex = (highlightIndex - 1 + searchResults.length) % searchResults.length
+    } else if (e.key === 'Enter' && highlightIndex >= 0) {
+      e.preventDefault()
+      selectLocation(searchResults[highlightIndex].code)
+      highlightIndex = -1
+    }
+  }
 
   let searchResults = $derived.by(() => {
     const q = locationSearch.trim().toLowerCase()
@@ -31,6 +47,7 @@
       t.name.toLowerCase().includes(q) || t.code.toLowerCase().includes(q)
     ).slice(0, 8)
   })
+  $effect(() => { locationSearch; highlightIndex = -1 })
 
   let locationDef = $derived(location && location !== 'sea' ? TERRITORY_MAP[location] : null)
   // In edit mode, show the pre-battle territory state so owner/embattled are correct
@@ -310,10 +327,10 @@
                 {/each}
                 <span class="text-text-muted ml-1">{entry.outcome}</span>
                 {#if entry.locationCode}
-                  <button class="p-1.5 rounded-md text-text-muted hover:text-accent active:bg-accent/10 transition-colors" onclick={() => editBattle(i)}>
+                  <button class="p-2.5 rounded-md text-text-muted hover:text-accent active:bg-accent/10 transition-colors" onclick={() => editBattle(i)}>
                     {@html icon('ui', 'edit', 'icon-xs')}
                   </button>
-                  <button class="p-1.5 rounded-md text-text-muted hover:text-danger active:bg-danger/10 transition-colors" onclick={() => deleteBattle(i)}>
+                  <button class="p-2.5 rounded-md text-text-muted hover:text-danger active:bg-danger/10 transition-colors" onclick={() => deleteBattle(i)}>
                     {@html icon('ui', 'trash', 'icon-xs')}
                   </button>
                 {/if}
@@ -338,13 +355,14 @@
         aria-label="Search battle location"
         placeholder="Search territory..."
         bind:value={locationSearch}
+        onkeydown={onLocationKeydown}
       />
       {#if searchResults.length > 0}
         <div class="space-y-1 max-h-48 overflow-y-auto">
-          {#each searchResults as t}
+          {#each searchResults as t, idx}
             {@const ts = appState.game.territories[t.code]}
             <button
-              class="w-full text-left px-3 py-2 rounded-md text-xs bg-bg-surface-alt/50 hover:bg-accent/10 active:bg-accent/20 flex justify-between items-center"
+              class="w-full text-left px-3 py-2 rounded-md text-xs flex justify-between items-center {idx === highlightIndex ? 'bg-accent/20 text-text-primary' : 'bg-bg-surface-alt/50 hover:bg-accent/10 active:bg-accent/20'}"
               onclick={() => selectLocation(t.code)}
             >
               <span>

@@ -161,10 +161,10 @@
                 {#if entry.iron > 0}<span style="color:var(--color-res-iron)">{entry.iron}</span>{/if}
                 {#if entry.osr > 0}<span style="color:var(--color-res-osr)">{entry.osr}</span>{/if}
                 {#if entry.convoyCP > 0}<span class="text-text-muted">({entry.convoyCP} CP)</span>{/if}
-                <button class="p-1.5 rounded-md text-text-muted hover:text-accent active:bg-accent/10 transition-colors" onclick={() => editRaid(i)}>
+                <button class="p-2.5 rounded-md text-text-muted hover:text-accent active:bg-accent/10 transition-colors" onclick={() => editRaid(i)}>
                   {@html icon('ui', 'edit', 'icon-xs')}
                 </button>
-                <button class="p-1.5 rounded-md text-text-muted hover:text-danger active:bg-danger/10 transition-colors" onclick={() => deleteRaid(i)}>
+                <button class="p-2.5 rounded-md text-text-muted hover:text-danger active:bg-danger/10 transition-colors" onclick={() => deleteRaid(i)}>
                   {@html icon('ui', 'trash', 'icon-xs')}
                 </button>
               </div>

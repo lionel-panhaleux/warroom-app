@@ -102,7 +102,7 @@
              {phase !== 'income' ? 'bg-bg-surface-alt text-text-muted' : 'bg-accent text-bg-primary active:bg-accent-dim'}"
       disabled={phase !== 'income'}
       onclick={collectIncome}
-    >{phase === 'income' ? 'Collect Income' : 'Income Collected \u2713'}</button>
+    >{phase === 'income' ? 'Collect Income' : 'Income Collected ✓'}</button>
   </section>
 
   <!-- Oil Bidding -->
@@ -110,7 +110,7 @@
     <h2 class="text-sm font-semibold text-text-muted uppercase tracking-wide mb-2">Oil Bidding</h2>
     <!-- U4: Clearer disabled state with label -->
     {#if phase !== 'bidding' && phase !== 'income'}
-      <div class="text-center py-3 text-sm text-accent/70 font-medium">Bids Confirmed \u2713</div>
+      <div class="text-center py-3 text-sm text-accent/70 font-medium">Bids Confirmed ✓</div>
     {/if}
     <div class="space-y-2 {phase !== 'bidding' ? 'opacity-30 pointer-events-none' : ''}">
       {#each NATION_IDS as id}
