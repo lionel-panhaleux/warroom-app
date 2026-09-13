@@ -1,0 +1,7 @@
+---
+# nginx_site from the server-setup repo; synchronize from ansible.posix.
+collections:
+  - name: https://github.com/lionel-panhaleux/server-setup.git
+    type: git
+    version: main
+  - name: ansible.posix

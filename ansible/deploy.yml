@@ -1,0 +1,74 @@
+---
+# Deploy warroom.krcg.org: ship the local build (dist/) and serve it with
+# server-setup's nginx_site role (SPA + Let's Encrypt).
+- name: Deploy warroom.krcg.org
+  hosts: all
+  become: true
+  vars:
+    warroom_dist: "{{ playbook_dir }}/../dist/"
+    warroom_root: /var/www/warroom
+
+  tasks:
+    - name: Check the app is built
+      ansible.builtin.stat:
+        path: "{{ warroom_dist }}index.html"
+      delegate_to: localhost
+      become: false
+      register: warroom_build
+
+    - name: Refuse to deploy without a build
+      ansible.builtin.assert:
+        that: warroom_build.stat.exists
+        fail_msg: "No dist/index.html: run `npm run build` at the repo root first"
+
+    # The site used to come from the legacy myserver repo, whose plain vhost files
+    # claim the same server name and serve the ACME challenge from another webroot.
+    # They must be gone before nginx_site runs: it re-issues the certificate
+    # through its own webroot, and the challenge would 404 behind them.
+    - name: Remove the legacy myserver vhosts
+      ansible.builtin.file:
+        path: "/etc/nginx/sites-enabled/warroom.krcg.org.{{ item }}.conf"
+        state: absent
+      loop: [http, https]
+
+    - name: Create the site root
+      ansible.builtin.file:
+        path: "{{ warroom_root }}"
+        state: directory
+        mode: "0755"
+
+    # runs as `sudo rsync` on the host: files land root-owned, world-readable
+    - name: Sync the build
+      ansible.posix.synchronize:
+        src: "{{ warroom_dist }}"
+        dest: "{{ warroom_root }}/"
+        delete: true
+        owner: false
+        group: false
+
+    - name: Serve it with nginx
+      ansible.builtin.include_role:
+        name: lionel_panhaleux.server_setup.nginx_site
+      vars:
+        nginx_site_name: warroom
+        nginx_site_domain: warroom.krcg.org
+        nginx_site_type: spa
+        nginx_site_root: "{{ warroom_root }}"
+        # the spa type caches every .js for a year; the service worker, its
+        # registration script and the shell keep their names across builds, so
+        # they must stay fresh (an exact match wins over the spa's regex location)
+        nginx_site_extra_locations: |
+          location = /index.html {
+              add_header Cache-Control "no-cache";
+          }
+          location = /sw.js {
+              add_header Cache-Control "no-cache";
+          }
+          location = /registerSW.js {
+              add_header Cache-Control "no-cache";
+          }
+
+    - name: Remove the legacy myserver content
+      ansible.builtin.file:
+        path: /home/lpanhaleux/projects/warroom.krcg.org
+        state: absent
