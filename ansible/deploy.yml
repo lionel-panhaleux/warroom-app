@@ -54,19 +54,6 @@
         nginx_site_domain: warroom.krcg.org
         nginx_site_type: spa
         nginx_site_root: "{{ warroom_root }}"
-        # the spa type caches every .js for a year; the service worker, its
-        # registration script and the shell keep their names across builds, so
-        # they must stay fresh (an exact match wins over the spa's regex location)
-        nginx_site_extra_locations: |
-          location = /index.html {
-              add_header Cache-Control "no-cache";
-          }
-          location = /sw.js {
-              add_header Cache-Control "no-cache";
-          }
-          location = /registerSW.js {
-              add_header Cache-Control "no-cache";
-          }
 
     - name: Remove the legacy myserver content
       ansible.builtin.file:
