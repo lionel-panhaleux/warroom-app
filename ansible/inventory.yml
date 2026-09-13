@@ -1,0 +1,8 @@
+# The laptop path. CI passes its own -i "$DEPLOY_HOST," with the key it writes,
+# which replaces this inventory.
+warroom:
+  hosts:
+    strasbourg:
+      ansible_host: 51.178.45.139
+      ansible_user: "{{ lookup('env', 'DEPLOY_USER') | default('deploy', true) }}"
+      ansible_ssh_private_key_file: ~/.ssh/deploy

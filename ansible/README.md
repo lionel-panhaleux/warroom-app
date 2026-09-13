@@ -10,12 +10,13 @@ From this `ansible/` directory:
 ```bash
 (cd .. && npm ci && npm run build)
 ansible-galaxy collection install -r requirements.yml
-ansible-playbook deploy.yml -i "HOST," --user deploy --private-key ~/.ssh/deploy --check --diff  # dry run
-ansible-playbook deploy.yml -i "HOST," --user deploy --private-key ~/.ssh/deploy
+ansible-playbook deploy.yml --check --diff  # dry run
+ansible-playbook deploy.yml
 ```
 
-The playbook refuses to run without `dist/index.html`; it deploys whatever is
-built, so build first.
+`inventory.yml` targets strasbourg as `deploy` with `~/.ssh/deploy`; set `DEPLOY_USER`
+to connect as someone else. The playbook refuses to run without `dist/index.html`;
+it deploys whatever is built, so build first.
 
 CI does the same on every push to `main` (and on demand from the Actions tab):
 [`deploy.yml`](../.github/workflows/deploy.yml) builds, then runs this playbook
