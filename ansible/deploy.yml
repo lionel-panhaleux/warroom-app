@@ -21,16 +21,6 @@
         that: warroom_build.stat.exists
         fail_msg: "No dist/index.html: run `npm run build` at the repo root first"
 
-    # The site used to come from the legacy myserver repo, whose plain vhost files
-    # claim the same server name and serve the ACME challenge from another webroot.
-    # They must be gone before nginx_site runs: it re-issues the certificate
-    # through its own webroot, and the challenge would 404 behind them.
-    - name: Remove the legacy myserver vhosts
-      ansible.builtin.file:
-        path: "/etc/nginx/sites-enabled/warroom.krcg.org.{{ item }}.conf"
-        state: absent
-      loop: [http, https]
-
     - name: Create the site root
       ansible.builtin.file:
         path: "{{ warroom_root }}"
@@ -54,8 +44,3 @@
         nginx_site_domain: warroom.krcg.org
         nginx_site_type: spa
         nginx_site_root: "{{ warroom_root }}"
-
-    - name: Remove the legacy myserver content
-      ansible.builtin.file:
-        path: /home/lpanhaleux/projects/warroom.krcg.org
-        state: absent
